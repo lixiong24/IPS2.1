@@ -1,0 +1,9 @@
+﻿{
+	"AuthenticationType": "Basic",
+	"EnabledSsl": false,
+	"MailFrom": "2094838895@qq.com",
+	"MailServer": "smtp.qq.com",
+	"MailServerPassWord": "lx123456",
+	"MailServerUserName": "2094838895",
+	"Port": "25"
+}

@@ -1,0 +1,293 @@
+﻿<%@ CodeTemplate Language="C#" TargetLanguage="C#" ResponseEncoding="UTF-8" Src="..\Common.cs" Inherits="CommonFunction.Common" Debug="False" Description="Template description here." %>
+<%@ Property Name="DevelopersName" Type="String" Category="Context" Default="lixiong" Description="The name to include in the comment header" %>
+<%@ Property Name="NameSpace" Type="String" Category="Context" Default="lixiong.Project" Description="The namespace to use for this class" %>
+<%@ Property Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Category="Context" Optional="True" Description="Database that the documentation should be based on." %>
+<%@ Property Name="View" Type="SchemaExplorer.ViewSchema" Category="Context" Description="Table that the object is based on." %>
+
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Name="System.Data" %>
+
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System.Text" %>
+<%@ Import Namespace="System.Collections.Specialized" %>
+
+// =================================================================== 
+// 项目说明,业务逻辑类,用CodeSmith自动生成.
+// =================================================================== 
+// File: <%= GetClassName(View) %>.cs
+// 修改日志如下：<%=DateTime.Now.ToShortDateString() %>: <%=DevelopersName %>    Original Version
+// ===================================================================
+using System;
+using System.ComponentModel;
+using System.Data;
+using <%= NameSpace %>.Model;
+using <%= NameSpace %>.DAL;
+
+namespace <%= NameSpace %>.Biz
+{
+	/// <summary>
+	/// 数据库视图：<%= View.Name %> 的业务逻辑类.
+	/// </summary>
+	[Serializable]
+	public partial class <%= GetClassName(View) %>
+	{
+		
+		#region Contructors
+		public <%= GetClassName(View) %>()
+		{
+		}
+		#endregion
+				
+		#region Data Access : Select
+		/// <summary>
+		/// 返回所有信息
+		/// </summary>
+		/// <returns></returns>
+		public static DataTable GetAllData()
+		{
+			return <%= GetDALClassName(View) %>.GetAllData();
+		}
+		/// <summary>
+		/// 根据条件查询信息
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0')</param>
+		/// <returns></returns>
+		public static DataTable GetAllData(string strCondition)
+		{
+			return <%= GetDALClassName(View) %>.GetAllData(strCondition);
+		}
+		/// <summary>
+		/// 根据条件查询信息
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如:  ID = '0')</param>
+		/// <param name="strExtended">返回的扩展列(例如: extended = id + name )</param>
+		/// <returns></returns>
+		public static DataTable GetAllData(string strCondition,string strExtended)
+		{
+			return <%= GetDALClassName(View) %>.GetAllData(strCondition,strExtended);
+		}
+		/// <summary>
+		/// 根据条件查询信息,返回第一条信息的实体类。
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0')</param>
+		/// <returns></returns>
+		public static <%= GetModelClassName(View) %> GetEntity(string strCondition)
+		{
+			return <%= GetDALClassName(View) %>.GetEntity(strCondition);
+		}
+		/// <summary>
+		/// 返回所有行数
+		/// </summary>
+		/// <returns></returns>
+		public static int GetCount()
+		{
+			return <%= GetDALClassName(View) %>.GetCount();
+		}
+		/// <summary>
+		/// 根据条件返回所有行数
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0')</param>
+		/// <returns></returns>
+		public static int GetCount(string strCondition)
+		{
+			return <%= GetDALClassName(View) %>.GetCount(strCondition);
+		}
+		/// <summary>
+		/// 检查数据是否存在
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0')</param>
+		/// <returns></returns>
+		public static bool ExistData(string strCondition)
+		{
+			if (GetCount(strCondition) == 0)
+			{
+				return false;
+			}
+			return true;
+		}
+		/// <summary>
+		/// 得到统计数据
+		/// </summary>
+		/// <param name="statistic">统计函数（如：count(*)）</param>
+		/// <param name="strCondition">查询条件(例如: ID = '0')</param>
+		/// <returns></returns>
+		public static string GetStatistic(string statistic, string strCondition)
+		{
+			return <%= GetDALClassName(View) %>.GetStatistic(statistic,strCondition);
+		}
+		#endregion
+		
+	}
+}
+<script runat="template">
+public string GetMethodName(TableSchema table, CommandSchema sp)
+{
+	string method = "";
+	if(sp.Name.StartsWith(table.Name + "_"))
+	{
+		method = sp.Name.Substring(table.Name.Length + 1);
+	}
+	else
+	{
+		method = sp.Name;
+	}
+	return method;
+}
+public string GetPrimaryKeyType(TableSchema table)
+{
+	if (table.PrimaryKey != null)
+	{
+		if (table.PrimaryKey.MemberColumns.Count == 1)
+		{
+			return GetCSType(table.PrimaryKey.MemberColumns[0]);
+		}
+		else
+		{
+			return GetCSType(table.PrimaryKey.MemberColumns[0]);
+			//throw new ApplicationException("This template will not work on primary keys with more than one member column.");
+		}
+	}
+	else
+	{
+		throw new ApplicationException("This template will only work on tables with a primary key.");
+	}
+}
+public string GetPrimaryKeyName(TableSchema table)
+{
+	if (table.PrimaryKey != null)
+	{
+		if (table.PrimaryKey.MemberColumns.Count == 1)
+		{
+			return table.PrimaryKey.MemberColumns[0].Name;
+		}
+		else
+		{
+			return table.PrimaryKey.MemberColumns[0].Name;
+			//throw new ApplicationException("This template will not work on primary keys with more than one member column.");
+		}
+	}
+	else
+	{
+		throw new ApplicationException("This template will only work on tables with a primary key.");
+	}
+}
+/*
+public StringCollection Relationships(TableSchema table)
+{
+	StringCollection relationShip = new StringCollection();
+	for(int i = 0; i < SourceTable.PrimaryKeys.Count; i++)
+	{
+		relationShip.Add("Select" + SourceTable.PrimaryKeys[i].ForeignKeyTable.Name + "By" + PrimaryKeyString(SourceTable));
+	}
+	for(int i = 0; i < SourceTable.ForeignKeys.Count; i++)
+	{
+		relationShip.Add("Select" + SourceTable.ForeignKeys[i].PrimaryKeyTable.Name + "By" + MasterKeyString(SourceTable, i));
+	}
+	return relationShip;
+}
+public string MasterKeyString(TableSchema table, int i)
+{
+	string s = "";
+	if(table.HasPrimaryKey && table.ForeignKeys.Count > 0)
+	{
+		s = table.ForeignKeys[i].ForeignKeyMemberColumns[0].Name;
+	}
+	return s;
+}
+public string PrimaryKeyString(TableSchema table)
+{
+	string s = "";
+	if(table.HasPrimaryKey)
+	{
+		for(int i = 0; i < table.PrimaryKey.MemberColumns.Count; i++) 
+		{ 
+			s = s + table.PrimaryKey.MemberColumns[i].Name;
+		}
+	}
+	return s;
+}
+public string ReturnValueType(string spName)
+{
+	string s = "";
+	if(spName.IndexOf("Select") > -1)
+	{
+		s = GetModelClassName(SourceTable);
+		if(spName.IndexOf("All") > -1 || spName.IndexOf("Inexact") > -1 || spName.IndexOf("Dynamic") > -1)
+		{
+			s = GetEntityCollectionClassName(SourceTable);
+		}
+		for(int i = 0; i < SourceTable.PrimaryKeys.Count; i++)
+		{
+			if(spName.IndexOf("Select" + SourceTable.PrimaryKeys[i].ForeignKeyTable.Name) > -1)
+			{
+				s = GetEntityCollectionClassName(SourceTable.PrimaryKeys[i].ForeignKeyTable.Name);
+			}
+		}
+		for(int i = 0; i < SourceTable.ForeignKeys.Count; i++)
+		{
+			if(spName.IndexOf("Select" + SourceTable.ForeignKeys[i].PrimaryKeyTable.Name) > -1)
+			{
+				s = GetModelClassName(SourceTable.ForeignKeys[i].PrimaryKeyTable.Name);
+			}
+		}
+		for(int i = 0; i < SourceTable.ForeignKeys.Count; i++)
+		{
+			for(int j = 0; j < SourceTable.ForeignKeys[i].ForeignKeyMemberColumns.Count; j++)
+			{
+				if(spName.IndexOf("Select" + SourceTable.Name + "By" + SourceTable.ForeignKeys[i].ForeignKeyMemberColumns[j].Name) > -1)
+				{
+					s = GetEntityCollectionClassName(SourceTable.Name);
+				}
+			}
+		}
+	}
+	else
+	{
+		s = "bool";
+	}
+	return s;
+}
+public string GeneralUpdateParametersSentence(CommandSchema sp)
+{
+	string s = "";
+	string t1 = @"cmd.AddInParameter(""{0}"", DbType.{1}, {2}.{3});";
+	string t2 = @"cmd.AddOutParameter(""{0}"", DbType.{1}, {2});";
+	for (int p = 0; p < sp.NonReturnValueParameters.Count; p++) 
+	{
+		if(sp.NonReturnValueParameters[p].Direction == ParameterDirection.Input)
+		{
+			s = s + String.Format(t1, sp.NonReturnValueParameters[p].Name, sp.NonReturnValueParameters[p].DataType, GetCamelCaseName(GetClassName(SourceTable.Name)), GetClassName(sp.NonReturnValueParameters[p].Name));
+			if(p < sp.NonReturnValueParameters.Count - 1)
+			{
+				s = s + Environment.NewLine + "\t\t\t";
+			}
+		}
+		if(sp.NonReturnValueParameters[p].Direction == ParameterDirection.InputOutput)
+		{
+			s = s + String.Format(t2, sp.NonReturnValueParameters[p].Name, sp.NonReturnValueParameters[p].DataType, GetDataTypeSize(sp.NonReturnValueParameters[p]));
+			if(p < sp.NonReturnValueParameters.Count - 1)
+			{
+				s = s + Environment.NewLine;
+			}
+		}
+	}
+	return s;
+}
+public string GeneralParametersValueSentence(CommandSchema sp)
+{
+	string output = "";
+	for (int p = 0; p < sp.NonReturnValueParameters.Count; p++) 
+	{
+		output += GetMemberVariableName(GetModelClassName(SourceTable));
+		output += ".";
+		output += GetPropertyName(sp.NonReturnValueParameters[p].Name);
+		if (p < sp.NonReturnValueParameters.Count - 1)
+		{
+			output += ", ";
+		}
+	}
+	return output;
+}
+*/
+</script>

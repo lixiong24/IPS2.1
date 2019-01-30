@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+	<script type="text/javascript" src="wwwroot/jquery.min.js"></script>
+</head>
+<body>
+	
+	<input id="username" type="text" />
+	<input id="password" type="text" />
+	<input id="Button1" type="button" value="提交" onclick="GoToSubmit()" /><br />
+	access_token:<p id="access_token"></p>
+	expires_in:<p id="expires_in"></p>
+	token_type:<p id="token_type"></p>
+	message:<p id="message"></p>
+	<input id="Button1" type="button" value="请求API" onclick="GoToAPI()" />
+	<script type="text/javascript">
+		function GoToSubmit()
+		{
+			var username = $("#username").val();
+			var password = $("#password").val();
+			jQuery.ajax({
+				url: 'http://localhost:60953/api/token?username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password),
+				type: 'POST',
+				timeout: 30000,
+				async: false,
+				contentType: "application/json",
+				error: function () {
+					alert("网络异常，添加失败！");
+					return false;
+				},
+				success: function (data) {
+					if (data.status)
+					{
+						$("#access_token").html(data.access_token);
+						$("#expires_in").html(data.expires_in);
+						$("#token_type").html(data.token_type);
+					}
+					else
+					{
+						$("#message").html(data.message);
+					}
+					
+				}
+			});
+		}
+		function GoToAPI()
+		{
+			var access_token = $("#access_token").html();
+			if (access_token == null || access_token == "")
+			{
+				alert("没有TOKEN");
+				return;
+			}
+			jQuery.ajax({
+				url: 'http://localhost:59004/api/values',
+				type: 'GET',
+				timeout: 3000,
+				async: false,
+				contentType: "application/json",
+				beforeSend: function (xhr) {
+					xhr.setRequestHeader('Authorization', 'Bearer ' + access_token)
+				},
+				error: function () {
+					alert("网络异常，添加失败！");
+					return false;
+				},
+				success: function (data) {
+					$("#message").html(data.manageDir);
+				}
+			});
+		}
+	</script>
+</body>
+</html>

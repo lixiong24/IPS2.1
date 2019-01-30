@@ -1,0 +1,602 @@
+﻿<%@ CodeTemplate Language="C#" TargetLanguage="C#" ResponseEncoding="UTF-8" Src="..\Common.cs" Inherits="CommonFunction.Common" Debug="False" Description="Template description here." %>
+<%@ Property Name="DevelopersName" Type="String" Category="Context" Default="lixiong" Description="The name to include in the comment header" %>
+<%@ Property Name="NameSpace" Type="String" Category="Context" Default="lixiong.Project" Description="The namespace to use for this class" %>
+<%@ Property Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Category="Context" Optional="True" Description="Database that the documentation should be based on." %>
+<%@ Property Name="SourceTable" Type="SchemaExplorer.TableSchema" Category="Context" Description="Table that the object is based on." %>
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Name="System.Data" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System.Text" %>
+<%@ Import Namespace="System.Collections.Specialized" %>
+// =================================================================== 
+// 项目说明,数据操作类,用CodeSmith自动生成。
+// =================================================================== 
+// 文件名: <%=GetDALClassName(SourceTable) %>.cs
+// 修改时间：<%=DateTime.Now.ToString() %>
+// 修改人: <%=DevelopersName %>
+// ===================================================================
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Data.Common;
+using System.Data.OleDb;
+using System.Collections;
+using Microsoft.Practices.EnterpriseLibrary.Data;
+using JX.Web.DataHelper;
+using JX.Web.Common;
+using <% =NameSpace %>.Model;
+
+namespace <%= NameSpace %>.DAL
+{
+	/// <summary>
+	/// 数据库表：<%= SourceTable.Name %> 的数据操作类.
+	/// </summary>
+	[Serializable]
+	public partial class <%=GetDALClassName(SourceTable) %> 
+	{	
+		/// <summary>
+		/// 空构造
+		/// </summary>
+		public <%=GetDALClassName(SourceTable) %>()
+		{
+		}
+		
+		#region Data Access : GetParameters 生成参数
+		/// <summary>
+		/// 通过数据读取器生成实体类
+		/// </summary>
+		/// <param name="rdr"></param>
+		/// <returns></returns>
+		public static <%=GetModelClassName(SourceTable) %> GetInfoFromrdr(NullableDataReader rdr)
+		{
+			<%=GetModelClassName(SourceTable) %> info = new <%=GetModelClassName(SourceTable) %>();
+			<% for (int i = 0; i < SourceTable.Columns.Count; i++) { %>
+			info.<%= GetPropertyName(SourceTable.Columns[i]) %> = <% if (GetCSType(SourceTable.Columns[i]) == "System.DateTime"){%>JX.Web.Common.DataConverter.CDate(rdr["<%= SourceTable.Columns[i].Name %>"])<%} else {%>(<%= GetCSType(SourceTable.Columns[i])%>)rdr["<%= SourceTable.Columns[i].Name %>"]<%}%>;
+			<% } %>
+			return info;
+		}
+		/// <summary>
+		/// 通过实体类生成参数集合
+		/// </summary>
+		/// <param name="info"></param>
+		/// <param name="parms"></param>
+		public static void GetParameters(<%=GetModelClassName(SourceTable) %> info, Parameters parms)
+		{
+			<% for (int i = 0; i < SourceTable.Columns.Count; i++) { %>
+			parms.AddInParameter("@<%= SourceTable.Columns[i].Name %>", <%= GetEnumDbType(SourceTable.Columns[i]) %>, info.<%= GetPropertyName(SourceTable.Columns[i]) %>);
+			<% } %>
+		}
+		/// <summary>
+		/// 通过Hashtable生成参数集合
+		/// </summary>
+		/// <param name="ht"></param>
+		/// <param name="parms"></param>
+		public static void GetParameters(Hashtable ht, Parameters parms)
+		{
+			foreach (DictionaryEntry de in ht)
+			{
+				parms.AddInParameter("@"+de.Key, Utility.TypeToDbType(de.Value.GetType()), de.Value);
+			}
+		}
+		#endregion
+		
+		#region Data Access : GetList 用于分页
+		/// <summary>
+		/// 通过存储过程"Common_GetList"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+		/// <returns></returns>
+		public IList<<%=GetModelClassName(SourceTable) %>> GetList(int startRowIndexId, int maxNumberRows,string Filter)
+		{
+			return GetList(startRowIndexId,maxNumberRows,"","","",Filter,"");
+		}
+		/// <summary>
+		/// 通过存储过程"Common_GetList"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+		/// <param name="SortColumn">排序字段名，只能指定一个字段</param>
+		/// <param name="StrColumn">返回列名</param>
+		/// <param name="Sorts">排序方式（DESC,ASC）</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+        /// <param name="TableName">查询表名，可以指定联合查询的SQL语句(例如: Comment LEFT JOIN Users ON Comment.UserName = Users.UserName)</param>
+		/// <returns></returns>
+		public IList<<%=GetModelClassName(SourceTable) %>> GetList(int startRowIndexId, int maxNumberRows,string SortColumn,string StrColumn,string Sorts,string Filter,string TableName)
+		{
+			if(string.IsNullOrEmpty(SortColumn))
+			{
+				SortColumn = "<%=GetFirstPrimaryKey(SourceTable)%>";
+			}
+			if(string.IsNullOrEmpty(StrColumn))
+			{
+				StrColumn = "*";
+			}
+			if(string.IsNullOrEmpty(Sorts))
+			{
+				Sorts = "DESC";
+			}
+			if(string.IsNullOrEmpty(TableName))
+			{
+				TableName = "<%= SourceTable.Name %>";
+			}
+			Database database = DatabaseFactory.CreateDatabase();
+			IList<<%=GetModelClassName(SourceTable) %>> list = new List<<%=GetModelClassName(SourceTable) %>>();
+			string storedProcedureName = "Common_GetList";
+			DbCommand storedProcCommand = database.GetStoredProcCommand(storedProcedureName);
+			database.AddInParameter(storedProcCommand, "@StartRows", DbType.Int32, startRowIndexId);
+			database.AddInParameter(storedProcCommand, "@PageSize", DbType.Int32, maxNumberRows);
+			database.AddInParameter(storedProcCommand, "@SortColumn", DbType.String, SortColumn);
+			database.AddInParameter(storedProcCommand, "@StrColumn", DbType.String, StrColumn);
+			database.AddInParameter(storedProcCommand, "@Sorts", DbType.String, Sorts);
+			database.AddInParameter(storedProcCommand, "@Filter", DbType.String, Filter);
+			database.AddInParameter(storedProcCommand, "@TableName", DbType.String, TableName);
+			database.AddOutParameter(storedProcCommand, "@Total", DbType.Int32, 0);
+			using (NullableDataReader reader = new NullableDataReader(database.ExecuteReader(storedProcCommand)))
+			{
+				while (reader.Read())
+				{
+					list.Add(GetInfoFromrdr(reader));
+				}
+			}
+			this.m_Total = (int)database.GetParameterValue(storedProcCommand, "@Total");
+			return list;
+		}
+		
+		/// <summary>
+		/// 通过存储过程"Common_GetListBySortColumn"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+		/// <returns></returns>
+		public IList<<%=GetModelClassName(SourceTable) %>> GetListBySortColumn(int startRowIndexId, int maxNumberRows,string Filter)
+		{
+			return GetListBySortColumn(startRowIndexId,maxNumberRows,"","","","","",Filter,"");
+		}
+		/// <summary>
+		/// 通过存储过程"Common_GetListBySortColumn"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+		/// <param name="Sorts">排序方式（DESC,ASC）</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+		/// <returns></returns>
+		public IList<<%=GetModelClassName(SourceTable) %>> GetListBySortColumn(int startRowIndexId, int maxNumberRows,string Sorts,string Filter)
+		{
+			return GetListBySortColumn(startRowIndexId,maxNumberRows,"","","","",Sorts,Filter,"");
+		}
+		/// <summary>
+		/// 通过存储过程"Common_GetListBySortColumn"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+		/// <param name="PrimaryColumn">主键字段名</param>
+		/// <param name="SortColumnDbType">排序字段的数据类型(如：int)</param>
+		/// <param name="SortColumn">排序字段名，只能指定一个字段</param>
+		/// <param name="StrColumn">返回列名</param>
+		/// <param name="Sorts">排序方式（DESC,ASC）</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+        /// <param name="TableName">查询表名，可以指定联合查询的SQL语句(例如: Comment LEFT JOIN Users ON Comment.UserName = Users.UserName)</param>
+		/// <returns></returns>
+		public IList<<%=GetModelClassName(SourceTable) %>> GetListBySortColumn(int startRowIndexId, int maxNumberRows,string PrimaryColumn,string SortColumnDbType,string SortColumn,string StrColumn,string Sorts,string Filter,string TableName)
+		{
+			if(string.IsNullOrEmpty(PrimaryColumn))
+			{
+				PrimaryColumn = "<%=GetFirstPrimaryKey(SourceTable)%>";
+			}
+			if(string.IsNullOrEmpty(SortColumnDbType))
+			{
+				SortColumnDbType = "int";
+			}
+			if(string.IsNullOrEmpty(SortColumn))
+			{
+				SortColumn = "<%=GetFirstPrimaryKey(SourceTable)%>";
+			}
+			if(string.IsNullOrEmpty(StrColumn))
+			{
+				StrColumn = "*";
+			}
+			if(string.IsNullOrEmpty(Sorts))
+			{
+				Sorts = "DESC";
+			}
+			if(string.IsNullOrEmpty(TableName))
+			{
+				TableName = "<%= SourceTable.Name %>";
+			}
+			Database database = DatabaseFactory.CreateDatabase();
+			IList<<%=GetModelClassName(SourceTable) %>> list = new List<<%=GetModelClassName(SourceTable) %>>();
+			string storedProcedureName = "Common_GetListBySortColumn";
+			DbCommand storedProcCommand = database.GetStoredProcCommand(storedProcedureName);
+			database.AddInParameter(storedProcCommand, "@StartRows", DbType.Int32, startRowIndexId);
+			database.AddInParameter(storedProcCommand, "@PageSize", DbType.Int32, maxNumberRows);
+			database.AddInParameter(storedProcCommand, "@PrimaryColumn", DbType.String, PrimaryColumn);
+            database.AddInParameter(storedProcCommand, "@SortColumnDbType", DbType.String, SortColumnDbType);
+			database.AddInParameter(storedProcCommand, "@SortColumn", DbType.String, SortColumn);
+			database.AddInParameter(storedProcCommand, "@StrColumn", DbType.String, StrColumn);
+			database.AddInParameter(storedProcCommand, "@Sorts", DbType.String, Sorts);
+			database.AddInParameter(storedProcCommand, "@Filter", DbType.String, Filter);
+			database.AddInParameter(storedProcCommand, "@TableName", DbType.String, TableName);
+			database.AddOutParameter(storedProcCommand, "@Total", DbType.Int32, 0);
+			using (NullableDataReader reader = new NullableDataReader(database.ExecuteReader(storedProcCommand)))
+			{
+				while (reader.Read())
+				{
+					list.Add(GetInfoFromrdr(reader));
+				}
+			}
+			this.m_TotalBySortColumn = (int)database.GetParameterValue(storedProcCommand, "@Total");
+			return list;
+		}
+		
+		private int m_Total=0;
+		/// <summary>
+		/// 得到存储过程"Common_GetList"查询结果的总数
+		/// </summary>
+		/// <returns></returns>
+		public int GetTotal()
+		{
+			return this.m_Total;
+		}
+		
+		private int m_TotalBySortColumn=0;
+		/// <summary>
+		/// 得到存储过程"Common_GetListBySortColumn"查询结果的总数
+		/// </summary>
+		/// <returns></returns>
+		public int GetTotalBySortColumn()
+		{
+			return this.m_TotalBySortColumn;
+		}
+		#endregion
+		
+		#region Data Access : Select
+		/// <summary>
+		/// 返回所有信息
+		/// </summary>
+		/// <returns></returns>
+		public DataTable GetAllData()
+		{
+			string strSQL = "select * from <%= SourceTable.Name %> ";
+			return DBHelper.ExecuteDataSetSql(strSQL).Tables[0];
+		}
+		/// <summary>
+		/// 根据条件查询所有信息
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public DataTable GetAllData(string strCondition,Hashtable htValue)
+		{
+			Parameters parms = new Parameters();
+			GetParameters(htValue, parms);
+			string strSQL = "select * from <%= SourceTable.Name %> where 1=1 " + strCondition;
+			return DBHelper.ExecuteDataSetSql(strSQL, parms).Tables[0];
+		}
+		/// <summary>
+		/// 根据条件查询指定列信息,如果指定列为空则返回所有信息。
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="strExtended">返回的指定列(例如: extended = id + name 或 distinct name)</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public DataTable GetAllData(string strCondition,string strExtended, Hashtable htValue)
+		{
+			Parameters parms = new Parameters();
+			GetParameters(htValue, parms);
+			
+			if (string.IsNullOrEmpty(strExtended))
+			{
+				strExtended = " * ";
+			}
+			string strSQL = "select " + strExtended + " from <%= SourceTable.Name %>  where 1=1 " + strCondition;
+			return DBHelper.ExecuteDataSetSql(strSQL, parms).Tables[0];
+		}
+		
+		<%if(SourceTable.HasPrimaryKey){%>
+		/// <summary>
+		/// 通过主键返回第一条信息的实体类。
+		/// </summary>
+		/// <returns></returns>
+		public <%=GetModelClassName(SourceTable) %> GetEntity(<% = GenPrimaryKeyParam(SourceTable) %>)
+		{
+			string strCondition = "";
+			<% for (int i = 0; i < SourceTable.PrimaryKey.MemberColumns.Count; i++) { %>
+			strCondition += " and <%= SourceTable.PrimaryKey.MemberColumns[i].Name %> = @<%= SourceTable.PrimaryKey.MemberColumns[i].Name %>";
+			<% } %>
+			
+			Hashtable htValue = new Hashtable();
+			<% for (int i = 0; i < SourceTable.PrimaryKey.MemberColumns.Count; i++) { %>
+			htValue.Add("<%= SourceTable.PrimaryKey.MemberColumns[i].Name %>", <%= GetCamelCaseName(GetSafeName(SourceTable.PrimaryKey.MemberColumns[i]))%>);
+			<% } %>
+			
+			return GetEntityByWhere(strCondition,htValue);
+		}
+		<%}%>
+		/// <summary>
+		/// 根据条件查询信息,返回第一条信息的实体类。
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public <%=GetModelClassName(SourceTable) %> GetEntityByWhere(string strCondition, Hashtable htValue)
+		{
+			<%=GetModelClassName(SourceTable) %> obj = null;
+			Parameters parms = new Parameters();
+			GetParameters(htValue, parms);
+			string strSQL = "select top 1 * from <%= SourceTable.Name %> where 1=1 " + strCondition;
+			using (NullableDataReader reader = DBHelper.ExecuteReaderSql(strSQL,parms))
+            {
+                if (reader.Read())
+                {
+                    obj = GetInfoFromrdr(reader);
+                }
+            }
+			if(obj == null)
+			{
+				obj = new <%=GetModelClassName(SourceTable) %>(true);
+			}
+			return obj;
+		}
+		
+		/// <summary>
+		/// 返回所有实体类列表
+		/// </summary>
+		/// <returns></returns>
+		public IList<<%=GetModelClassName(SourceTable) %>> GetEntityList()
+		{
+			List<<%=GetModelClassName(SourceTable) %>> list = new List<<%=GetModelClassName(SourceTable) %>>();
+			string strSQL = "select * from <%= SourceTable.Name %> where 1=1 ";
+			using (NullableDataReader reader = DBHelper.ExecuteReaderSql(strSQL))
+            {
+                while (reader.Read())
+                {
+					list.Add(GetInfoFromrdr(reader));
+                }
+            }
+			return list;
+		}
+		/// <summary>
+		/// 根据条件查询信息,返回所有实体类列表
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public IList<<%=GetModelClassName(SourceTable) %>> GetEntityList(string strCondition, Hashtable htValue)
+		{
+			List<<%=GetModelClassName(SourceTable) %>> list = new List<<%=GetModelClassName(SourceTable) %>>();
+			Parameters parms = new Parameters();
+			GetParameters(htValue, parms);
+			string strSQL = "select * from <%= SourceTable.Name %> where 1=1 " + strCondition;
+			using (NullableDataReader reader = DBHelper.ExecuteReaderSql(strSQL,parms))
+            {
+                while (reader.Read())
+                {
+					list.Add(GetInfoFromrdr(reader));
+                }
+            }
+			return list;
+		}
+		
+		/// <summary>
+		/// 返回所有行数
+		/// </summary>
+		/// <returns></returns>
+		public int GetCount()
+		{
+			string strSQL = "select count(*) from <%= SourceTable.Name %> ";
+			object objCount = DBHelper.ExecuteScalarSql(strSQL);
+			if (objCount == null)
+				objCount = 0;
+			return int.Parse(objCount.ToString());
+		}
+		/// <summary>
+		/// 根据条件返回所有行数
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public int GetCount(string strCondition, Hashtable htValue)
+		{
+			string strSQL = "select count(*) from <%= SourceTable.Name %> where 1=1 " + strCondition;
+			Parameters parms = new Parameters();
+			GetParameters(htValue, parms);
+			object objCount = DBHelper.ExecuteScalarSql(strSQL,parms);
+			if (objCount == null)
+				objCount = 0;
+			return int.Parse(objCount.ToString());
+		}
+		/// <summary>
+		/// 检查数据是否存在
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public bool ExistData(string strCondition, Hashtable htValue)
+		{
+			if (GetCount(strCondition,htValue) == 0)
+			{
+				return false;
+			}
+			return true;
+		}
+		/// <summary>
+		/// 得到统计数据
+		/// </summary>
+		/// <param name="statistic">统计函数（如：count(*)）</param>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public string GetStatistic(string statistic, string strCondition, Hashtable htValue)
+		{
+			if (string.IsNullOrEmpty(statistic))
+			{
+				return "";
+			}
+			string strSQL = "select " + statistic + " from <%= SourceTable.Name %> where 1=1 " + strCondition;
+			Parameters parms = new Parameters();
+			GetParameters(htValue, parms);
+			object obj = DBHelper.ExecuteScalarSql(strSQL,parms);
+			if (obj == null)
+				obj = "";
+			return obj.ToString();
+		}
+		/// <summary>
+		/// 得到数据表中第一个主键的最大数值加1
+		/// </summary>
+		/// <returns></returns>
+		public int GetNewID()
+		{
+			int maxId = DBHelper.GetMaxId("<%= SourceTable.Name %>", "<%=GetFirstPrimaryKey(SourceTable)%>");
+			if (maxId < 1)
+			{
+				return 1;
+			}
+			return (maxId + 1);
+		}
+		#endregion
+		
+		#region Data Access : Insert/Delete/Update
+		/// <summary>
+		/// 添加新数据，返回新的ID号。需要有一个单一主键，并且开启有标识符属性
+		/// </summary>
+		/// <param name="_<%=GetModelClassName(SourceTable) %>"></param>
+		/// <returns></returns>
+		public int Insert(<%=GetModelClassName(SourceTable) %> _<%=GetModelClassName(SourceTable) %>)
+		{
+			if (Add(_<%=GetModelClassName(SourceTable) %>))
+			{
+				return DBHelper.GetMaxId("<%= SourceTable.Name %>","<%=GetFirstPrimaryKey(SourceTable)%>");
+			}
+			return -1;
+		}
+		/// <summary>
+		/// 添加新数据，返回执行结果
+		/// </summary>
+		/// <param name="_<%=GetModelClassName(SourceTable) %>"></param>
+		/// <returns></returns>
+		public bool Add(<%=GetModelClassName(SourceTable) %> _<%=GetModelClassName(SourceTable) %>)
+		{
+			//定义参数 
+			Parameters parameters = new Parameters();
+			GetParameters(_<%=GetModelClassName(SourceTable) %>,parameters);
+
+			string strSQL = "insert into <%= SourceTable.Name %> ("+
+			<% for (int i = 0; i < SourceTable.Columns.Count; i++) { %>
+				<% if (!IsIdentity(SourceTable.Columns[i])) { %>
+							"<%= SourceTable.Columns[i].Name %><% if (i < SourceTable.Columns.Count - 1) { %>,"+<% } else { %>) "+<% } %>
+				<% } %>
+			<% } %>
+							"values("+
+			<% for (int i = 0; i < SourceTable.Columns.Count; i++) { %>
+				<% if (!IsIdentity(SourceTable.Columns[i])) { %>
+							"@<%= SourceTable.Columns[i].Name %><% if (i < SourceTable.Columns.Count - 1) { %>,"+<% } else { %>)";<% } %>
+				<% } %>
+			<% } %>
+			
+			return DBHelper.ExecuteSql(strSQL, parameters);
+		}
+		
+		<%if(SourceTable.HasPrimaryKey){%>
+		/// <summary>
+		/// 通过主键删除
+		/// </summary>
+		/// <returns></returns>
+		public bool Delete(<% = GenPrimaryKeyParam(SourceTable) %>)
+		{
+			string strSQL = "delete from <%= SourceTable.Name %> where " +
+			<% for (int i = 0; i < SourceTable.PrimaryKey.MemberColumns.Count; i++) { %>
+			<% if (i > 0) { %>" AND "+<% } %>
+			"<%= SourceTable.PrimaryKey.MemberColumns[i].Name %> = @<%= SourceTable.PrimaryKey.MemberColumns[i].Name %>"<% if (i == SourceTable.PrimaryKey.MemberColumns.Count-1) { %>; <% } else {%>+<%} %>
+			<% } %>
+			
+			Hashtable htValue = new Hashtable();
+			<% for (int i = 0; i < SourceTable.PrimaryKey.MemberColumns.Count; i++) { %>
+			htValue.Add("<%= SourceTable.PrimaryKey.MemberColumns[i].Name %>", <%= GetCamelCaseName(GetSafeName(SourceTable.PrimaryKey.MemberColumns[i]))%>);
+			<% } %>
+			
+			Parameters parms = new Parameters();
+			GetParameters(htValue, parms);
+			
+			return DBHelper.ExecuteSql(strSQL,parms);
+		}
+		<%}%>
+		/// <summary>
+		/// 批量删除(如删除条件为空则全部删除)
+		/// </summary>
+		/// <param name="strCondition">参数化删除条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public bool BatchDelete(string strCondition,Hashtable htValue)
+		{
+			Parameters parms = new Parameters();
+			GetParameters(htValue, parms);
+			string strSQL = "delete from <%= SourceTable.Name %> where 1=1 " + strCondition;
+			return DBHelper.ExecuteSql(strSQL,parms);
+		}
+		/// <summary>
+		/// 修改
+		/// </summary>
+		/// <param name="_<%=GetModelClassName(SourceTable) %>"></param>
+		/// <returns></returns>
+		public bool Update(<%=GetModelClassName(SourceTable) %> _<%=GetModelClassName(SourceTable) %>)
+		{
+			//定义参数 
+			Parameters parameters = new Parameters();
+			GetParameters(_<%=GetModelClassName(SourceTable) %>,parameters);
+			
+			string strSQL = "Update <%= SourceTable.Name %> SET "+
+			<% for (int i = 0; i < SourceTable.NonPrimaryKeyColumns.Count; i++) { %>
+			"<%= SourceTable.NonPrimaryKeyColumns[i].Name %> = @<%= SourceTable.NonPrimaryKeyColumns[i].Name %><% if (i < SourceTable.NonPrimaryKeyColumns.Count - 1) { %>,"+<% } else { %>"+<% } %>
+			<% } %>
+			" WHERE "+
+			<% if(SourceTable.HasPrimaryKey){ for (int i = 0; i < SourceTable.PrimaryKey.MemberColumns.Count; i++) { %>
+			<% if (i > 0) { %>" AND "+<% } %>
+			"<%= SourceTable.PrimaryKey.MemberColumns[i].Name %> = @<%= SourceTable.PrimaryKey.MemberColumns[i].Name %><% if (i == SourceTable.PrimaryKey.MemberColumns.Count-1) { %>"; <% } else {%>"+<%} %>
+			<% }} else{ %>
+			"<%= SourceTable.Columns[0].Name %> = @<%= SourceTable.Columns[0].Name %>";
+			<% } %>
+
+			return DBHelper.ExecuteSql(strSQL, parameters);
+		}
+		/// <summary>
+		/// 批量修改(如修改条件为空则全部修改)
+		/// </summary>
+		/// <param name="strColumns">参数化要修改的列（如：ID = @ID,Name = @Name）</param>
+		/// <param name="htColValue">包含要修改的名称和值的集合,对应strColumns参数中要修改列的值</param>
+		/// <param name="strCondition">参数化修改条件(例如: and ID = @ID)</param>
+		/// <param name="htValue">包含查询名称和值的集合,对应strCondition参数中的值</param>
+		/// <returns></returns>
+		public bool BatchUpdate(string strColumns,Hashtable htColValue, string strCondition,Hashtable htValue)
+		{
+			if (string.IsNullOrEmpty(strColumns))
+				return false;
+				
+			strColumns = JX.Web.Common.StringHelper.ReplaceIgnoreCase(strColumns,"@","@UP_");
+			string strSQL = "Update <%= SourceTable.Name %> SET " + strColumns + " where 1=1 " + strCondition;
+			
+			Parameters parms = new Parameters();
+			//生成要修改列的参数
+			foreach (DictionaryEntry de in htColValue)
+			{
+				parms.AddInParameter("@UP_"+de.Key, DbType.Object, de.Value);
+			}
+			//生成查询条件的参数
+			GetParameters(htValue, parms);
+			
+			return DBHelper.ExecuteSql(strSQL,parms);
+		}
+		#endregion
+	}
+}
+<script runat="template">
+public string GetSqlParameterStatement(ColumnSchema column)
+{
+    string param = "\"@" + column.Name + "\"," + GetEnumSqlDbType(column);
+    return param;
+}
+</script>

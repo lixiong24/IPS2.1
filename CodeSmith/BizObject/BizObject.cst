@@ -1,0 +1,406 @@
+﻿<%@ CodeTemplate Language="C#" TargetLanguage="C#" ResponseEncoding="UTF-8" Src="..\Common.cs" Inherits="CommonFunction.Common" Debug="False" Description="Template description here." %>
+<%@ Property Name="DevelopersName" Type="String" Category="Context" Default="lixiong" Description="The name to include in the comment header" %>
+<%@ Property Name="NameSpace" Type="String" Category="Context" Default="lixiong.Project" Description="The namespace to use for this class" %>
+<%@ Property Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Category="Context" Optional="True" Description="Database that the documentation should be based on." %>
+<%@ Property Name="SourceTable" Type="SchemaExplorer.TableSchema" Category="Context" Description="Table that the object is based on." %>
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Name="System.Data" %>
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System.Text" %>
+<%@ Import Namespace="System.Collections.Specialized" %>
+// =================================================================== 
+// 项目说明,业务逻辑类,用CodeSmith自动生成.
+// =================================================================== 
+// 文件名: <%=GetClassName(SourceTable) %>.cs
+// 修改时间：<%=DateTime.Now.ToString() %>
+// 修改人: <%=DevelopersName %>
+// ===================================================================
+using System;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Data;
+using System.Collections;
+using <%= NameSpace %>.Model;
+using <%= NameSpace %>.DAL;
+
+namespace <%= NameSpace %>.Biz
+{
+	/// <summary>
+	/// 数据库表：<%= SourceTable.Name %> 的业务逻辑类.
+	/// </summary>
+	[Serializable]
+	public partial class <%= GetClassName(SourceTable) %>
+	{
+		private static readonly <%=GetDALClassName(SourceTable) %> dal = new <%=GetDALClassName(SourceTable) %>();
+		private <%= GetModelClassName(SourceTable) %> _model;
+		
+		#region Contructors
+		/// <summary>
+		/// 初始化类的成员
+		/// </summary>
+		public <%= GetClassName(SourceTable) %>()
+		{
+			_model = new <%= GetModelClassName(SourceTable) %>();
+		}
+		/// <summary>
+		/// 用一个已经设置好的Model初始化类的成员。
+		/// </summary>
+		public <%= GetClassName(SourceTable) %>(<%= GetModelClassName(SourceTable) %> info) : this()
+		{
+			_model = info;
+		}
+		<%if(SourceTable.HasPrimaryKey){%>
+		/// <summary>
+		/// 用主键初始化类的成员。
+		/// </summary>
+		public <%= GetClassName(SourceTable) %>(<% = GenPrimaryKeyParam(SourceTable) %>) : this()
+		{
+			_model = dal.GetEntity(<% for (int i = 0; i < SourceTable.PrimaryKey.MemberColumns.Count; i++) { %><%= GetCamelCaseName(GetSafeName(SourceTable.PrimaryKey.MemberColumns[i])) %><% if (i == SourceTable.PrimaryKey.MemberColumns.Count-1) { %> <% } else {%>,<%} %><% } %>);
+		}
+		<%}%>
+		#endregion
+		
+		#region Public Properties
+		<% for (int i = 0; i < SourceTable.Columns.Count; i++) { %>
+		/// <summary>
+		/// <%= SourceTable.Columns[i].Description %>
+		/// </summary>
+		public <%= GetCSType(SourceTable.Columns[i]) %> <%= GetPropertyName(SourceTable.Columns[i]) %>
+		{
+			get { return _model.<%= GetPropertyName(SourceTable.Columns[i]) %>;}
+			set { _model.<%= GetPropertyName(SourceTable.Columns[i]) %> = value;}
+		}
+		<% } %>
+		#endregion
+		
+		#region Data Access : GetList 用于分页
+		/// <summary>
+		/// 通过存储过程"Common_GetList"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+		/// <returns></returns>
+		public static IList<<%=GetModelClassName(SourceTable) %>> GetList(int startRowIndexId, int maxNumberRows,string Filter)
+		{
+			return GetList(startRowIndexId,maxNumberRows,"","","",Filter,"");
+		}
+		/// <summary>
+		/// 通过存储过程"Common_GetList"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+		/// <param name="SortColumn">排序字段名，只能指定一个字段</param>
+		/// <param name="StrColumn">返回列名</param>
+		/// <param name="Sorts">排序方式（DESC,ASC）</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+        /// <param name="TableName">查询表名，可以指定联合查询的SQL语句(例如: Comment LEFT JOIN Users ON Comment.UserName = Users.UserName)</param>
+		/// <returns></returns>
+		public static IList<<%=GetModelClassName(SourceTable) %>> GetList(int startRowIndexId, int maxNumberRows,string SortColumn,string StrColumn,string Sorts,string Filter,string TableName)
+		{
+			return dal.GetList(startRowIndexId,maxNumberRows,SortColumn,StrColumn,Sorts,Filter,TableName);
+		}
+		
+		/// <summary>
+		/// 通过存储过程"Common_GetListBySortColumn"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+		/// <returns></returns>
+		public static IList<<%=GetModelClassName(SourceTable) %>> GetListBySortColumn(int startRowIndexId, int maxNumberRows,string Filter)
+		{
+			return GetListBySortColumn(startRowIndexId,maxNumberRows,"","","","","",Filter,"");
+		}
+		/// <summary>
+		/// 通过存储过程"Common_GetListBySortColumn"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+		/// <param name="Sorts">排序方式（DESC,ASC）</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+		/// <returns></returns>
+		public static IList<<%=GetModelClassName(SourceTable) %>> GetListBySortColumn(int startRowIndexId, int maxNumberRows,string Sorts,string Filter)
+		{
+			return GetListBySortColumn(startRowIndexId,maxNumberRows,"","","","",Sorts,Filter,"");
+		}
+		/// <summary>
+		/// 通过存储过程"Common_GetListBySortColumn"，得到分页后的数据
+		/// </summary>
+		/// <param name="startRowIndexId">开始行索引</param>
+        /// <param name="maxNumberRows">每页最大显示数量</param>
+		/// <param name="PrimaryColumn">主键字段名</param>
+		/// <param name="SortColumnDbType">排序字段的数据类型(如：int)</param>
+		/// <param name="SortColumn">排序字段名，只能指定一个字段</param>
+		/// <param name="StrColumn">返回列名</param>
+		/// <param name="Sorts">排序方式（DESC,ASC）</param>
+        /// <param name="Filter">查询条件(例如: Name = 'name' and id=1 )</param>
+        /// <param name="TableName">查询表名，可以指定联合查询的SQL语句(例如: Comment LEFT JOIN Users ON Comment.UserName = Users.UserName)</param>
+		/// <returns></returns>
+		public static IList<<%=GetModelClassName(SourceTable) %>> GetListBySortColumn(int startRowIndexId, int maxNumberRows,string PrimaryColumn,string SortColumnDbType,string SortColumn,string StrColumn,string Sorts,string Filter,string TableName)
+		{
+			return dal.GetListBySortColumn(startRowIndexId,maxNumberRows,PrimaryColumn,SortColumnDbType,SortColumn,StrColumn,Sorts,Filter,TableName);
+		}
+		
+		/// <summary>
+		/// 得到存储过程"Common_GetList"查询结果的总数
+		/// </summary>
+        /// <param name="Filter"></param>
+		/// <returns></returns>
+		public static int GetTotal(string Filter)
+		{
+			return dal.GetTotal();
+		}
+		/// <summary>
+		/// 得到存储过程"Common_GetList"查询结果的总数
+		/// </summary>
+		/// <param name="SortColumn"></param>
+		/// <param name="StrColumn"></param>
+		/// <param name="Sorts"></param>
+        /// <param name="Filter"></param>
+        /// <param name="TableName"></param>
+		/// <returns></returns>
+		public static int GetTotal(string SortColumn,string StrColumn,string Sorts,string Filter,string TableName)
+		{
+			return dal.GetTotal();
+		}
+		
+		/// <summary>
+		/// 得到存储过程"Common_GetListBySortColumn"查询结果的总数
+		/// </summary>
+        /// <param name="Filter"></param>
+		/// <returns></returns>
+		public static int GetTotalBySortColumn(string Filter)
+		{
+			return dal.GetTotalBySortColumn();
+		}
+		/// <summary>
+		/// 得到存储过程"Common_GetListBySortColumn"查询结果的总数
+		/// </summary>
+		/// <param name="Sorts"></param>
+        /// <param name="Filter"></param>
+		/// <returns></returns>
+		public static int GetTotalBySortColumn(string Sorts,string Filter)
+		{
+			return dal.GetTotalBySortColumn();
+		}
+		/// <summary>
+		/// 得到存储过程"Common_GetListBySortColumn"查询结果的总数
+		/// </summary>
+		/// <param name="PrimaryColumn"></param>
+		/// <param name="SortColumnDbType"></param>
+		/// <param name="SortColumn"></param>
+		/// <param name="StrColumn"></param>
+		/// <param name="Sorts"></param>
+        /// <param name="Filter"></param>
+        /// <param name="TableName"></param>
+		/// <returns></returns>
+		public static int GetTotalBySortColumn(string PrimaryColumn,string SortColumnDbType,string SortColumn,string StrColumn,string Sorts,string Filter,string TableName)
+		{
+			return dal.GetTotalBySortColumn();
+		}
+		#endregion
+		
+		#region Data Access : Select
+		/// <summary>
+		/// 返回所有信息
+		/// </summary>
+		/// <returns></returns>
+		public static DataTable GetAllData()
+		{
+			return dal.GetAllData();
+		}
+		/// <summary>
+		/// 根据条件查询信息
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public static DataTable GetAllData(string strCondition,Hashtable htValue)
+		{
+			return dal.GetAllData(strCondition,htValue);
+		}
+		/// <summary>
+		/// 根据条件查询信息
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="strExtended">返回的指定列(例如: extended = id + name 或 distinct name)</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public static DataTable GetAllData(string strCondition,string strExtended, Hashtable htValue)
+		{
+			return dal.GetAllData(strCondition,strExtended,htValue);
+		}
+		
+		<%if(SourceTable.HasPrimaryKey){%>
+		/// <summary>
+		/// 根据主键,返回第一条信息的实体类。
+		/// </summary>
+		/// <returns></returns>
+		public static <%= GetModelClassName(SourceTable) %> GetEntity(<% = GenPrimaryKeyParam(SourceTable) %>)
+		{
+			return dal.GetEntity(<% for (int i = 0; i < SourceTable.PrimaryKey.MemberColumns.Count; i++) { %><%= GetCamelCaseName(GetSafeName(SourceTable.PrimaryKey.MemberColumns[i])) %><% if (i == SourceTable.PrimaryKey.MemberColumns.Count-1) { %> <% } else {%>,<%} %><% } %>);
+		}
+		<%}%>
+		/// <summary>
+		/// 根据条件查询信息,返回第一条信息的实体类。
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public static <%= GetModelClassName(SourceTable) %> GetEntityByWhere(string strCondition, Hashtable htValue)
+		{
+			return dal.GetEntityByWhere(strCondition,htValue);
+		}
+		
+		/// <summary>
+		/// 返回所有实体类列表
+		/// </summary>
+		/// <returns></returns>
+		public static IList<<%= GetModelClassName(SourceTable) %>> GetEntityList()
+		{
+			return dal.GetEntityList();
+		}
+		/// <summary>
+		/// 根据条件查询信息,返回所有实体类列表
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public static IList<<%= GetModelClassName(SourceTable) %>> GetEntityList(string strCondition, Hashtable htValue)
+		{
+			return dal.GetEntityList(strCondition,htValue);
+		}
+		
+		/// <summary>
+		/// 返回所有行数
+		/// </summary>
+		/// <returns></returns>
+		public static int GetCount()
+		{
+			return dal.GetCount();
+		}
+		/// <summary>
+		/// 根据条件返回所有行数
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public static int GetCount(string strCondition, Hashtable htValue)
+		{
+			return dal.GetCount(strCondition,htValue);
+		}
+		
+		/// <summary>
+		/// 检查数据是否存在
+		/// </summary>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public static bool ExistData(string strCondition, Hashtable htValue)
+		{
+			if (GetCount(strCondition,htValue) == 0)
+			{
+				return false;
+			}
+			return true;
+		}
+		/// <summary>
+		/// 得到统计数据
+		/// </summary>
+		/// <param name="statistic">统计函数（如：count(*)）</param>
+		/// <param name="strCondition">参数化查询条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public static string GetStatistic(string statistic, string strCondition, Hashtable htValue)
+		{
+			return dal.GetStatistic(statistic,strCondition,htValue);
+		}
+		/// <summary>
+		/// 得到数据表中第一个主键的最大数值加1
+		/// </summary>
+		/// <returns></returns>
+		public static int GetNewID()
+		{
+			return dal.GetNewID();
+		}
+		#endregion
+		
+		#region Data Access : Insert/Delete/Update
+		/// <summary>
+		/// 添加新数据，返回新的ID号。
+		/// </summary>
+		/// <returns></returns>
+		public int Insert()
+		{			
+			return dal.Insert(_model);
+		}
+		/// <summary>
+		/// 添加新数据，返回执行结果
+		/// </summary>
+		/// <returns></returns>
+		public bool Add()
+		{
+			return dal.Add(_model);
+		}
+		
+		<%if(SourceTable.HasPrimaryKey){%>
+		/// <summary>
+		/// 通过主键删除
+		/// </summary>
+		/// <returns></returns>
+		public bool Delete(<% = GenPrimaryKeyParam(SourceTable) %>)
+		{
+			return dal.Delete(<% for (int i = 0; i < SourceTable.PrimaryKey.MemberColumns.Count; i++) { %><%= GetCamelCaseName(GetSafeName(SourceTable.PrimaryKey.MemberColumns[i])) %><% if (i == SourceTable.PrimaryKey.MemberColumns.Count-1) { %> <% } else {%>,<%} %><% } %>);
+		}
+		<%}%>
+		/// <summary>
+		/// 批量删除(如删除条件为空则全部删除)
+		/// </summary>
+		/// <param name="strCondition">参数化删除条件(例如: and Name = @Name )</param>
+		/// <param name="htValue">包含查询名称和值的集合</param>
+		/// <returns></returns>
+		public bool BatchDelete(string strCondition,Hashtable htValue)
+		{
+			return dal.BatchDelete(strCondition,htValue);
+		}
+		
+		/// <summary>
+		/// 修改
+		/// </summary>
+		/// <returns></returns>
+		public bool Update()
+		{
+			return dal.Update(_model);
+		}
+		/// <summary>
+		/// 批量修改(如修改条件为空则全部修改)
+		/// </summary>
+		/// <param name="strColumns">参数化要修改的列（如：ID = @ID,Name = @Name）</param>
+		/// <param name="htColValue">包含要修改的名称和值的集合,对应strColumns参数中要修改列的值</param>
+		/// <param name="strCondition">参数化修改条件(例如: and ID = @ID)</param>
+		/// <param name="htValue">包含查询名称和值的集合,对应strCondition参数中的值</param>
+		/// <returns></returns>
+		public bool BatchUpdate(string strColumns,Hashtable htColValue, string strCondition,Hashtable htValue)
+		{
+			return dal.BatchUpdate(strColumns,htColValue,strCondition,htValue);
+		}
+		#endregion
+	}
+}
+<script runat="template">
+public string GetMethodName(TableSchema table, CommandSchema sp)
+{
+	string method = "";
+	if(sp.Name.StartsWith(table.Name + "_"))
+	{
+		method = sp.Name.Substring(table.Name.Length + 1);
+	}
+	else
+	{
+		method = sp.Name;
+	}
+	return method;
+}
+</script>

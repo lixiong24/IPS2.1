@@ -1,0 +1,170 @@
+﻿<%@ CodeTemplate Language="C#" TargetLanguage="C#" ResponseEncoding="UTF-8" Src="..\Common.cs" Inherits="CommonFunction.Common" Debug="False" Description="Template description here." %>
+<%@ Property Name="DevelopersName" Type="String" Category="Context" Default="lixiong" Description="The name to include in the comment header" %>
+<%@ Property Name="NameSpace" Type="String" Category="Context" Default="lixiong.Project" Description="The namespace to use for this class" %>
+<%@ Property Name="SourceDatabase" Type="SchemaExplorer.DatabaseSchema" Category="Context" Optional="True" Description="Database that the documentation should be based on." %>
+<%@ Property Name="View" Type="SchemaExplorer.ViewSchema" Category="Context" Description="Table that the object is based on." %>
+
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Assembly Name="System.Data" %>
+
+<%@ Import Namespace="SchemaExplorer" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System.Text" %>
+<%@ Import Namespace="System.Collections.Specialized" %>
+
+// =================================================================== 
+// 项目说明,数据操作类,用CodeSmith自动生成。
+// =================================================================== 
+// File: <%= GetDALClassName(View) %>.cs
+// 修改日志如下：<%=DateTime.Now.ToShortDateString() %>: <%=DevelopersName %>    Original Version
+// ===================================================================
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using MyADO;
+using <% =NameSpace %>.Model;
+
+namespace <%= NameSpace %>.DAL
+{
+	/// <summary>
+	/// 数据库视图：<%= View.Name %> 的数据操作类.
+	/// </summary>
+	[Serializable]
+	public partial class <%=GetDALClassName(View) %> 
+	{
+		private <%=GetDALClassName(View) %>()
+		{
+		}
+		
+		#region Data Access : Select
+		/// <summary>
+		/// 返回所有信息
+		/// </summary>
+		/// <returns></returns>
+		public static DataTable GetAllData()
+		{
+			string strSQL = "select * from [<%= View.Name %>] ";
+			return DBManagerFactory.Default.GetDataTable(strSQL);
+		}
+		/// <summary>
+		/// 根据条件查询所有信息
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0' and Name = 'name' )</param>
+		/// <returns></returns>
+		public static DataTable GetAllData(string strCondition)
+		{
+			string strSQL = "select * from [<%= View.Name %>] ";
+			if (!string.IsNullOrEmpty(strCondition))
+			{
+				strSQL = strSQL + " where " + strCondition;
+			}
+			return DBManagerFactory.Default.GetDataTable(strSQL);
+		}
+		/// <summary>
+		/// 根据条件查询指定列信息,如果指定列为空则返回所有信息。
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0' and Name = 'name')</param>
+		/// <param name="strExtended">返回的指定列(例如: extended = id + name 或 distinct name)</param>
+		/// <returns></returns>
+		public static DataTable GetAllData(string strCondition,string strExtended)
+		{
+			if (string.IsNullOrEmpty(strExtended))
+			{
+				strExtended = " * ";
+			}
+			string strSQL = "select " + strExtended + " from [<%= View.Name %>] ";
+			if (!string.IsNullOrEmpty(strCondition))
+			{
+				strSQL = strSQL + " where " + strCondition;
+			}
+			return DBManagerFactory.Default.GetDataTable(strSQL);
+		}
+		/// <summary>
+		/// 根据条件查询信息,返回第一条信息的实体类。
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0' and Name = 'name')</param>
+		/// <returns></returns>
+		public static <%=GetModelClassName(View) %> GetEntity(string strCondition)
+		{
+			<%=GetModelClassName(View) %> obj = null;
+			string strSQL = "select top 1 * from [<%= View.Name %>] ";
+			if (!string.IsNullOrEmpty(strCondition))
+			{
+				strSQL = strSQL + " where " + strCondition;
+			}
+			DataTable dt = DBManagerFactory.Default.GetDataTable(strSQL);
+			foreach (DataRow row in dt.Rows)
+			{
+				obj = new <%=GetModelClassName(View) %>();
+				<% for (int i = 0; i < View.Columns.Count; i++) { %>
+				obj.<%= GetPropertyName(View.Columns[i]) %> = <% if (GetCSType(View.Columns[i]) == "System.DateTime"){%><%= GetCSType(View.Columns[i])%>.Parse(row["<%= View.Columns[i].Name %>"].ToString())<%} else {%>(<%= GetCSType(View.Columns[i])%>)row["<%= View.Columns[i].Name %>"]<%}%>;
+				<% } %>
+			}
+			dt.Dispose();
+			return obj;
+		}
+		/// <summary>
+		/// 返回所有行数
+		/// </summary>
+		/// <returns></returns>
+		public static int GetCount()
+		{
+			string strSQL = "select count(*) from [<%= View.Name %>] ";
+			return int.Parse(DBManagerFactory.Default.ExeSQLScalar(strSQL));
+		}
+		/// <summary>
+		/// 根据条件返回所有行数
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0')</param>
+		/// <returns></returns>
+		public static int GetCount(string strCondition)
+		{
+			string strSQL = "select count(*) from [<%= View.Name %>] ";
+			if (!string.IsNullOrEmpty(strCondition))
+			{
+				strSQL = strSQL + " where " + strCondition;
+			}
+			return int.Parse(DBManagerFactory.Default.ExeSQLScalar(strSQL));
+		}
+		/// <summary>
+		/// 检查数据是否存在
+		/// </summary>
+		/// <param name="strCondition">查询条件(例如: ID = '0')</param>
+		/// <returns></returns>
+		public static bool ExistData(string strCondition)
+		{
+			if (GetCount(strCondition) == 0)
+			{
+				return false;
+			}
+			return true;
+		}
+		/// <summary>
+		/// 得到统计数据
+		/// </summary>
+		/// <param name="statistic">统计函数（如：count(*)）</param>
+		/// <param name="strCondition">查询条件(例如: ID = '0')</param>
+		/// <returns></returns>
+		public static string GetStatistic(string statistic, string strCondition)
+		{
+			if (string.IsNullOrEmpty(statistic))
+			{
+				return "";
+			}
+			string strSQL = "select " + statistic + " from [<%= View.Name %>] ";
+			if (!string.IsNullOrEmpty(strCondition))
+			{
+				strSQL = strSQL + " where " + strCondition;
+			}
+			return DBManagerFactory.Default.ExeSQLScalar(strSQL);
+		}
+		#endregion
+	}
+}
+<script runat="template">
+public string GetSqlParameterStatement(ColumnSchema column)
+{
+    string param = "\"@" + column.Name + "\"," + GetEnumSqlDbType(column);
+    return param;
+}
+</script>

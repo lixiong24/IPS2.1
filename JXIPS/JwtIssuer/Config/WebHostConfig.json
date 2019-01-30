@@ -1,0 +1,10 @@
+﻿{
+	"LogFactoryName": "JX.ADO.LogRepositoryADO,JX.ADO",
+	"Edition": "Shop",
+	"EnableHtml": false,
+	"EnableSubDomain": false,
+	"EnableMobileBrowser": false,
+	"EnableComment": false,
+	"EnableCrm": false,
+	"EnableCollection": false
+}

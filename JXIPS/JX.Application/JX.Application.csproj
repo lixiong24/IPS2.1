@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1705;1685</NoWarn>
+    <DocumentationFile>bin\Debug\netstandard2.0\JX.Application.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JX.ADO\JX.ADO.csproj" />
+    <ProjectReference Include="..\JX.EF\JX.EF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AccessManage\" />
+  </ItemGroup>
+
+</Project>
