@@ -930,11 +930,13 @@ namespace JX.Infrastructure
 		/// 客户端通过AJAX文件，上传文件到指定位置。成功则通过ResultInfo.Data返回文件名。
 		/// </summary>
 		/// <param name="file">上传控件(从Request.Form.Files[0]得到)</param>
-		/// <param name="fileDir">保存文件目录，不存在则创建。(不带文件名，如：UploadFiles/Photo/)。不指定时，从UploadFilesConfig文件中取值</param>
+		/// <param name="fileDir">保存文件目录，不存在则创建。(不带文件名，相对于网站静态文件目录。如：UploadFiles/Photo/)。不指定时，从UploadFilesConfig文件中取值</param>
 		/// <param name="allowedExtensions">允许上传的文件后缀名，多个后缀名用“,”分割（如：jpg,swf,flv）。不指定时，从UploadFilesConfig文件中取值</param>
 		/// <param name="fileNameMode">文件名模式：{$Origin}：原文件名；{$Random}：随机数。不指定时，从UploadFilesConfig文件中取值</param>
+		/// <param name="isThumb">是否生成缩略图</param>
+		/// <param name="isWaterMark">是否添加水印</param>
 		/// <returns></returns>
-		public static async Task<ResultInfo> FileUploadSaveAs(IFormFile file, string fileDir="", string allowedExtensions="", string fileNameMode="")
+		public static async Task<ResultInfo> FileUploadSaveAs(IFormFile file, string fileDir="", string allowedExtensions="", string fileNameMode="",bool isThumb=false,bool isWaterMark=false)
 		{
 			ResultInfo resultInfo = new ResultInfo();
 			try
@@ -965,8 +967,7 @@ namespace JX.Infrastructure
 				{
 					fileDir = fileDir + FileHelper.DirectorySeparatorChar;
 				}
-				fileDir = FileHelper.WebRootPath + FileHelper.DirectorySeparatorChar + fileDir;
-				FileHelper.CreateFileFolder(fileDir);
+				FileHelper.CreateFileFolder(FileHelper.WebRootPath + FileHelper.DirectorySeparatorChar + fileDir);
 				#endregion
 				#region 得到允许上传的文件后缀名
 				if (string.IsNullOrEmpty(allowedExtensions))
@@ -1007,12 +1008,19 @@ namespace JX.Infrastructure
 					.Replace("{$Random}", DataSecurity.MakeFileRndName());
 				#endregion
 				string strFileName = strFile + "." + strExte;
-				string filePath = fileDir + strFileName;
+				string filePath = FileHelper.WebRootPath + FileHelper.DirectorySeparatorChar + fileDir + strFileName;
 				using (var stream = new FileStream(filePath, FileMode.Create))
 				{
 					await file.CopyToAsync(stream);
 				}
-
+				if (isWaterMark)
+				{
+					WaterMark.AddWaterMark(FileHelper.WebRootName + FileHelper.DirectorySeparatorChar + fileDir + strFileName);
+				}
+				if (isThumb)
+				{
+					Thumbs.GetThumbUrl("/" + fileDir.Replace(FileHelper.DirectorySeparatorChar, "/") + strFileName, true);
+				}
 				resultInfo.Status = 1;
 				resultInfo.Msg = "上传成功";
 				resultInfo.Data = strFileName;

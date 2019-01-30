@@ -14,7 +14,13 @@
 	<input type="button" value="上传" onclick="doUpload('divUpload2')" />
 	<input type="hidden" id="hidFile2" value="" />
 </div>
-
+<div id="divUpload3">
+	图片： <input type="file" name="file3" />
+	<input type="button" value="上传" onclick="doUploadImage('divUpload3')" />
+	<br />
+	<img src="" />
+	<input type="hidden" id="hidFile3" value="" />
+</div>
 
 	@section scripts {
 <script type="text/javascript">
@@ -38,6 +44,35 @@
 			success: function (returnData) {
 				if (returnData.status == "1") {
 					$(objContainer).find("input[type='hidden']").val(returnData.data);
+				}
+				alert(returnData.msg);
+			},
+			error: function () {
+				alert("上传失败");
+			}
+		});
+	}
+	function doUploadImage(containerID) {
+		var objContainer = $("#" + containerID);
+		var fileUpload = $(objContainer).find("input[type='file']").get(0).files[0];
+		if (!fileUpload) {
+			alert("请选择上传文件");
+			return false;
+		}
+		var formData = new FormData();
+		formData.append(fileUpload.name, fileUpload);
+		$.ajax({
+			url: '@Url.Action("UploadImageHandle","Common")',
+			type: 'POST',
+			data: formData,
+			async: true,
+			cache: false,
+			contentType: false,
+			processData: false,
+			success: function (returnData) {
+				if (returnData.status == "1") {
+					$(objContainer).find("input[type='hidden']").val(returnData.data);
+					$(objContainer).find("img").attr("src","/UploadFiles/" + returnData.data);
 				}
 				alert(returnData.msg);
 			},

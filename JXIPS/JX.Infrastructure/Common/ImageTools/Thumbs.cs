@@ -15,7 +15,7 @@ namespace JX.Infrastructure.Common
 		/// 生成缩略图，并返回图片调用URL。
 		/// 返回格式：/uploads/123_S_50_50.jpg
 		/// </summary>
-		/// <param name="originalImagePath">原图地址(如：/uploads/123.jpg)</param>
+		/// <param name="originalImagePath">原图Url(如：/uploads/123.jpg)</param>
 		/// <param name="isRebuild">存在同名的缩略图时，是否重新生成。（true：是；false：否；）</param>
 		/// <returns></returns>
 		public static string GetThumbUrl(string originalImagePath, bool isRebuild)
@@ -40,8 +40,8 @@ namespace JX.Infrastructure.Common
 					byHeightAndWidth = ThumbsMode.AddBackColor;
 					break;
 			}
-			
-			string strOriImagePhysical = FileHelper.MapPath(FileHelper.WebRootPath + originalImagePath);
+			originalImagePath = originalImagePath.TrimStart('~');
+			string strOriImagePhysical = FileHelper.MapPath(FileHelper.WebRootPath + FileHelper.DirectorySeparatorChar + originalImagePath.Replace("/", FileHelper.DirectorySeparatorChar));
 			string strImageDir = Path.GetDirectoryName(strOriImagePhysical) + Path.DirectorySeparatorChar.ToString();
 			string strImageName = Path.GetFileNameWithoutExtension(strOriImagePhysical);
 			string strImageExtension = Path.GetExtension(strOriImagePhysical);

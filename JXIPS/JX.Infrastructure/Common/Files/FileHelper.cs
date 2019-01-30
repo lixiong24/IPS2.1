@@ -488,7 +488,7 @@ namespace JX.Infrastructure.Common
 		/// <returns></returns>
 		public static string GetFileName(string path)
 		{
-			return Path.GetFileName(MapPath(path));
+			return Path.GetFileName(path);
 		}
 		/// <summary>
 		/// 获取文件扩展名
@@ -497,7 +497,7 @@ namespace JX.Infrastructure.Common
 		/// <returns></returns>
 		public static string GetFileExtension(string path)
 		{
-			return Path.GetExtension(MapPath(path));
+			return Path.GetExtension(path);
 		}
 		/// <summary>
 		/// 获取文件名不带扩展名
@@ -506,7 +506,7 @@ namespace JX.Infrastructure.Common
 		/// <returns></returns>
 		public static string GetFileNameWithOutExtension(string path)
 		{
-			return Path.GetFileNameWithoutExtension(MapPath(path));
+			return Path.GetFileNameWithoutExtension(path);
 		}
 		#endregion
 

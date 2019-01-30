@@ -19,6 +19,13 @@ namespace JXWebHost.Controllers
 			ResultInfo resultInfo = await Utility.FileUploadSaveAs(formFile);
 			return Json(resultInfo);
 		}
+		[HttpPost]
+		public async Task<IActionResult> UploadImageHandle()
+		{
+			var formFile = Request.Form.Files[0];
+			ResultInfo resultInfo = await Utility.FileUploadSaveAs(formFile,"","","",true,true);
+			return Json(resultInfo);
+		}
 
 		public IActionResult ValidateCode()
 		{
