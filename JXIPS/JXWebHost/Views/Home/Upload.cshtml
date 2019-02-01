@@ -21,9 +21,15 @@
 	<img src="" />
 	<input type="hidden" id="hidFile3" value="" />
 </div>
+<div id="divUpload4">
+	@await Component.InvokeAsync("MorePic",new MorePicViewModel { Prefix="ctl",PhotoPathList= "|201921123056.jpg",FileNumLimit=1 })
+</div>
+<div id="divUpload5">
+	@await Component.InvokeAsync("MorePic", new MorePicViewModel { Prefix = "ctl1" })
+</div>
 
-	@section scripts {
-<script type="text/javascript">
+@section scripts {
+	<script type="text/javascript">
 	function doUpload(containerID) {
 		var objContainer = $("#" + containerID);
 		var fileUpload = $(objContainer).find("input[type='file']").get(0).files[0];
@@ -72,7 +78,8 @@
 			success: function (returnData) {
 				if (returnData.status == "1") {
 					$(objContainer).find("input[type='hidden']").val(returnData.data);
-					$(objContainer).find("img").attr("src","/UploadFiles/" + returnData.data);
+					var imgUrl = "@Utility.GetBasePath()@Utility.UploadDirPath()" + returnData.data;
+					$(objContainer).find("img").attr("src", imgUrl);
 				}
 				alert(returnData.msg);
 			},
@@ -81,5 +88,5 @@
 			}
 		});
 	}
-</script>
-	}
+	</script>
+}

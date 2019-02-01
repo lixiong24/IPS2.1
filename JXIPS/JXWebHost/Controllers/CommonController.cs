@@ -20,10 +20,10 @@ namespace JXWebHost.Controllers
 			return Json(resultInfo);
 		}
 		[HttpPost]
-		public async Task<IActionResult> UploadImageHandle()
+		public async Task<IActionResult> UploadImageHandle(bool isThumb = false, bool isWaterMark = false)
 		{
 			var formFile = Request.Form.Files[0];
-			ResultInfo resultInfo = await Utility.FileUploadSaveAs(formFile,"","","",true,true);
+			ResultInfo resultInfo = await Utility.FileUploadSaveAs(formFile,"","","", isThumb, isWaterMark);
 			return Json(resultInfo);
 		}
 

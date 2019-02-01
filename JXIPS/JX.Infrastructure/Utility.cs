@@ -611,8 +611,16 @@ namespace JX.Infrastructure
 		}
 
 		/// <summary>
-		/// 得到上传目录的完整路径。
-		/// IsStaticDir为false时，返回：/UploadFiles/；
+		/// 得到上传目录名称
+		/// </summary>
+		/// <returns></returns>
+		public static string UploadDir()
+		{
+			return ConfigHelper.Get<UploadFilesConfig>().UploadDir;
+		}
+		/// <summary>
+		/// 得到上传目录路径。
+		/// IsStaticDir为false时，返回：UploadFiles/；
 		/// IsStaticDir为true时，返回：F:\WebHost\wwwroot/UploadFiles/；
 		/// </summary>
 		/// <param name="IsStaticDir">是否添加静态文件目录到上传目录名称前面</param>
@@ -626,11 +634,7 @@ namespace JX.Infrastructure
 			}
 			if (IsStaticDir)
 			{
-				UploadDir = FileHelper.WebRootPath + "/" + UploadDir;
-			}
-			else
-			{
-				UploadDir = GetBasePath() + UploadDir;
+				UploadDir = FileHelper.WebRootPath + FileHelper.DirectorySeparatorChar + UploadDir;
 			}
 			return UploadDir;
 
