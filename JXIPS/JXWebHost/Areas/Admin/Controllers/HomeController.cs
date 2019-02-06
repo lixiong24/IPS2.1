@@ -221,7 +221,10 @@ namespace JXWebHost.Areas.Admin.Controllers
 			Utility.RemoveSession("ReturnUrl");
 			return View();
 		}
-
+		public IActionResult Forbidden()
+		{
+			return View();
+		}
 		#region 辅助方法
 		private IList<MenuEntity> InitSubMenu(XmlNode channelMenuNode)
 		{
