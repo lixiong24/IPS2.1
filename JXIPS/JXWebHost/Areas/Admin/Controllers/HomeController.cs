@@ -81,23 +81,7 @@ namespace JXWebHost.Areas.Admin.Controllers
         {
 			ViewData["Title"] = ConfigHelper.Get<SiteConfig>().SiteName;
 			ViewData["AdminName"] = User.FindFirst(ClaimTypes.Name).Value;
-			WebHostConfig webHostConfig = ConfigHelper.Get<WebHostConfig>();
-			string adminMenuPath = "~/Config/AdminMenuShop.xml";
-			//switch (webHostConfig.Edition)
-			//{
-			//	case "Base":
-			//		adminMenuPath = "~/Config/AdminMenuBase.xml";
-			//		break;
-			//	case "BaseUser":
-			//		adminMenuPath = "~/Config/AdminMenuBaseUser.xml";
-			//		break;
-			//	case "Shop":
-			//		adminMenuPath = "~/Config/AdminMenuShop.xml";
-			//		break;
-			//	case "Industry":
-			//		adminMenuPath = "~/Config/AdminMenuIndustry.xml";
-			//		break;
-			//}
+			string adminMenuPath = Utility.GetAdminMenuPath();
 			XmlHelper xmlHelper = XmlHelper.Instance(FileHelper.MapPath(adminMenuPath),XmlType.File);
 			XmlDocument xmlDoc = xmlHelper.XmlDoc;
 			XmlNode rootNode = xmlDoc.SelectSingleNode("menu");
@@ -155,10 +139,11 @@ namespace JXWebHost.Areas.Admin.Controllers
 		[HttpGet]
 		public IActionResult ModifyPassword()
 		{
-			return View();
+            return View();
 		}
 		[HttpPost]
-		public async Task<IActionResult> ModifyPassword(ModifyPasswordViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ModifyPassword(ModifyPasswordViewModel model)
 		{
 			if (!ModelState.IsValid)
 			{

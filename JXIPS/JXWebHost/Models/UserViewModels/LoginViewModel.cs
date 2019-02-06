@@ -18,6 +18,7 @@ namespace JXWebHost.Models.UserViewModels
 		public string UserPassword { get; set; }
 
         [Display(Name = "图形验证码")]
-        public string ValidateCode { get; set; }
+		[DisplayFormat(ConvertEmptyStringToNull = false)]
+		public string ValidateCode { get; set; }
 	}
 }

@@ -6,6 +6,7 @@ using JX.EF;
 using JX.EF.Repository;
 using JX.Infrastructure.Common;
 using JX.Infrastructure.Framework.Authorize;
+using JX.Infrastructure.Framework.Filter;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -1433,7 +1434,19 @@ namespace JXWebHost
 
 			services.AddAuthorization();
 
-			services.AddMvc();
+			//处理跨站请求伪造
+			services.AddAntiforgery(options =>
+			{
+				// Set Cookie properties using CookieBuilder properties†.
+				options.FormFieldName = "AntiforgeryFieldname";
+				options.HeaderName = "X-CSRF-TOKEN-JXWebHost";
+				options.SuppressXFrameOptionsHeader = false;
+			});
+
+			services.AddMvc(options => 
+            {
+                options.Filters.Add<ModelStateActionFilter>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

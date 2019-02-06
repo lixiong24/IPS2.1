@@ -130,6 +130,8 @@ JX.Infrastructure								基础设施层
 		IdentityResult								身份结果类，用于注册、登录后返回结果使用。
 		Authorize									身份认证相关
 			AdminAuthorizeAttribute						后台管理员授权特性
+		Filter										过滤器模块
+			ModelStateActionFilter						页面统一模型验证处理
 
 	Utility										常用函数
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

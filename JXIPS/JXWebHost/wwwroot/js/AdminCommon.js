@@ -20,6 +20,9 @@ function DeleteSingle(id,url,callback) {
 			type: "POST",
 			url: url,
 			data: { "id": id },
+			headers: {
+				"X-CSRF-TOKEN-JXWebHost": $("input[name='AntiforgeryFieldname']").val()
+			},
 			error: function (data, status, e) {
 				layer.alert('网络超时，删除失败!');
 			},
@@ -60,6 +63,9 @@ function DeleteMulti(url, callback) {
 			type: "Post",
 			url: url,
 			data: sendData,
+			headers: {
+				"X-CSRF-TOKEN-JXWebHost": $("input[name='AntiforgeryFieldname']").val()
+			},
 			error: function (data, status, e) {
 				layer.alert('删除失败!');
 			},

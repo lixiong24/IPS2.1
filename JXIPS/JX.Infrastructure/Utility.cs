@@ -5345,5 +5345,59 @@ namespace JX.Infrastructure
 			}
 		}
 		#endregion
+
+		#region 得到菜单路径
+		/// <summary>
+		/// 得到管理后台菜单路径。例：~/Config/AdminMenuShop.xml
+		/// </summary>
+		/// <returns></returns>
+		public static string GetAdminMenuPath()
+		{
+			WebHostConfig webHostConfig = ConfigHelper.Get<WebHostConfig>();
+			string adminMenuPath = "~/Config/AdminMenuShop.xml";
+			switch (webHostConfig.Edition)
+			{
+				case "Base":
+					adminMenuPath = "~/Config/AdminMenuBase.xml";
+					break;
+				case "BaseUser":
+					adminMenuPath = "~/Config/AdminMenuBaseUser.xml";
+					break;
+				case "Shop":
+					adminMenuPath = "~/Config/AdminMenuShop.xml";
+					break;
+				case "Industry":
+					adminMenuPath = "~/Config/AdminMenuIndustry.xml";
+					break;
+			}
+			return adminMenuPath;
+		}
+
+		/// <summary>
+		/// 得到会员中心菜单路径。例：~/Config/UserMenuShop.xml
+		/// </summary>
+		/// <returns></returns>
+		public static string GetUserMenuPath()
+		{
+			WebHostConfig webHostConfig = ConfigHelper.Get<WebHostConfig>();
+			string userMenuPath = "~/Config/UserMenuShop.xml";
+			switch (webHostConfig.Edition)
+			{
+				case "Base":
+					userMenuPath = "~/Config/UserMenuBase.xml";
+					break;
+				case "BaseUser":
+					userMenuPath = "~/Config/UserMenuBaseUser.xml";
+					break;
+				case "Shop":
+					userMenuPath = "~/Config/UserMenuShop.xml";
+					break;
+				case "Industry":
+					userMenuPath = "~/Config/UserMenuIndustry.xml";
+					break;
+			}
+			return userMenuPath;
+		}
+		#endregion
 	}
 }
