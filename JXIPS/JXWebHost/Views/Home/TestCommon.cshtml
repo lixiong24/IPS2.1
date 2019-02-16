@@ -78,3 +78,30 @@
 <p>TrueName:@ViewData["TrueName"]</p>
 <p>UserID:@ViewData["UserID"]</p>
 <p>GroupID:@ViewData["GroupID"]</p>
+
+<p>初始净利润：<input type="text" id="jll" />亿</p>
+<p>增长年限：<input type="text" id="yearLength" value="10" /></p>
+<p>年增长率：<input type="text" id="zzl" value="0" />%</p>
+<p>贴现率：<input type="text" id="txl" value="8" />%</p>
+<p>总市值：<span id="spanSZ"></span>亿</p>
+<input type="button" class="btn btn-default" onclick="TestTXL()" value="计算" />
+
+@section scripts {
+	<script type="text/javascript">
+		function TestTXL() {
+			var jllInit = $("#jll").val();
+			var zzl = $("#zzl").val();
+			var txl = 1 + parseFloat($("#txl").val()) / 100;
+			var yearLength = $("#yearLength").val();
+			var totalSZ = 0;
+			var prveJLL = jllInit;
+			for (i = 0; i < yearLength; i++) {
+				var yearJLL = parseFloat(prveJLL) + (prveJLL * zzl / 100);
+				var yearSZ = parseFloat(yearJLL) / txl;
+				prveJLL = yearSZ;
+				totalSZ = parseFloat(totalSZ) + yearSZ;
+			}
+			$("#spanSZ").html(totalSZ);
+		}
+	</script>
+}
