@@ -226,7 +226,6 @@ namespace JXWebHost.Controllers
 			sender2.FromName = "lixiong";
 			sender2.MailToAddressList.Add(new MailboxAddress("442106890@qq.com"));
 			sender2.AttachmentFilePath = Utility.UploadDirPath(true) + "a.rar";
-			//sender2.AttachmentFilePath = "wwwroot/UploadFiles/a.rar";
 			if (sender2.Send() == MailState.Ok)
 			{
 				ViewData["msg"] = "邮件发送成功！";
