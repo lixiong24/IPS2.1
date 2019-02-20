@@ -58,14 +58,14 @@ namespace JX.Infrastructure.Common
 			return strResult;
 		}
 
-		/// <summary>
-		/// 生成缩略图，并返回图片物理地址。
-		/// 返回格式：d:/website/uploads/123_S_50_50.jpg
-		/// </summary>
-		/// <param name="originalImagePath">原图物理地址</param>
-		/// <param name="isRebuild">存在同名的缩略图时，是否重新生成。（true：是；false：否；）</param>
-		/// <returns></returns>
-		public static string GetThumbPath(string originalImagePath, bool isRebuild)
+        /// <summary>
+        /// 生成缩略图，并返回图片物理地址。
+        /// 返回格式：d:/website/uploads/123_S_50_50.jpg
+        /// </summary>
+        /// <param name="originalImagePath">原图物理地址(如：d:/website/uploads/123.jpg)</param>
+        /// <param name="isRebuild">存在同名的缩略图时，是否重新生成。（true：是；false：否；）</param>
+        /// <returns></returns>
+        public static string GetThumbPath(string originalImagePath, bool isRebuild)
 		{
 			ThumbsConfig thumbConfig = ConfigHelper.Get<ThumbsConfig>();
 			int thumbsWidth = thumbConfig.ThumbsWidth;

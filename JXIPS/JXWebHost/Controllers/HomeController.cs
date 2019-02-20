@@ -248,10 +248,10 @@ namespace JXWebHost.Controllers
 			strMsg += "静态文件目录名称：" + FileHelper.WebRootName + " ";
 			ViewData["Msg"] = strMsg;
 
-			var thumbUrl = Thumbs.GetThumbUrl("/UploadFiles/test.jpg", true);
+			var thumbUrl = Thumbs.GetThumbUrl(Utility.GetBasePath() + Utility.UploadDirPath() + "test.jpg", true);
 			ViewData["ImageUrl"] = Url.Content(thumbUrl);
 
-			var thumbPath = Thumbs.GetThumbPath(FileHelper.WebRootPath + "/UploadFiles/test1.jpg", true);
+			var thumbPath = Thumbs.GetThumbPath(Utility.UploadDirPath(true) + "test1.jpg", true);
 			ViewData["ImagePath"] = Url.Content(thumbPath);
 
 			var waterMarkConfig = ConfigHelper.Get<WaterMarkConfig>();
@@ -277,8 +277,8 @@ namespace JXWebHost.Controllers
 			strWaterMarkMsg += "WaterMarkThumbPercent:" + waterMarkConfig.WaterMarkImageInfo.WaterMarkThumbPercent + " ";
 			ViewData["WaterMarkMsg"] = strWaterMarkMsg;
 
-			WaterMark.AddWaterMark("wwwroot/UploadFiles/test.jpg");
-			ViewData["WaterUrl"] = Url.Content("/UploadFiles/test.jpg");
+			WaterMark.AddWaterMark(FileHelper.WebRootName + FileHelper.DirectorySeparatorChar + Utility.UploadDirPath() + "test.jpg");
+			ViewData["WaterUrl"] = Url.Content(Utility.GetBasePath() + Utility.UploadDirPath() + "test.jpg");
 
 			waterMarkConfig.WaterMarkType = 0;
 			waterMarkConfig.WaterMarkTextInfo.Text = "asp.net core";
@@ -294,19 +294,11 @@ namespace JXWebHost.Controllers
 
 		public IActionResult EFTest()
 		{
-			SortModelField[] orderByExpression = new SortModelField[2];
-			SortModelField sortModelField1 = new SortModelField
-			{
-				SortName = "Province",
-				IsDESC = true
-			};
-			SortModelField sortModelField2 = new SortModelField
-			{
-				SortName = "City",
-				IsDESC = true
-			};
-			orderByExpression[0] = sortModelField1;
-			orderByExpression[1] = sortModelField2;
+			SortModelField[] orderByExpression = new SortModelField[2] 
+            {
+                new SortModelField { SortName = "Province", IsDESC = true },
+                new SortModelField { SortName = "City", IsDESC = true }
+            };
 			var result = _RegionRepository.LoadAll(null, orderByExpression);
 			var list = result.ToList();
 			Address address = new Address();

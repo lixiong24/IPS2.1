@@ -506,29 +506,27 @@ namespace JX.Infrastructure
 		/// <param name="errorMessage">消息内容</param>
 		/// <param name="returnurl">返回页面地址</param>
 		/// <param name="pageUrl">显示消息的页面地址</param>
-		public static void WriteErrMsg(string errorMessage, string returnurl, string pageUrl= "/Admin/Home/ShowError")
+		public static void WriteErrMsg(string errorMessage, string returnurl= "mClose", string pageUrl= "/Admin/Home/ShowMessage")
 		{
-			SetSession("ErrorMessage", errorMessage);
-			SetSession("ReturnUrl", returnurl);
-			MyHttpContext.Current.Response.Redirect(pageUrl);
+			WriteMessage(errorMessage, returnurl, "错误消息", pageUrl);
 		}
 		/// <summary>
 		/// 会员中心显示错误消息。页面："~/User/ShowError"。
 		/// </summary>
 		/// <param name="errorMessage">消息内容</param>
 		/// <param name="returnurl">返回页面地址</param>
-		public static void WriteUserErrMsg(string errorMessage, string returnurl)
+		public static void WriteUserErrMsg(string errorMessage, string returnurl = "mClose")
 		{
-			WriteErrMsg(errorMessage, returnurl, "/User/ShowError");
+			WriteErrMsg(errorMessage, returnurl, "/User/ShowMessage");
 		}
 		/// <summary>
 		/// 网站前台显示错误消息。页面："~/Home/ShowError"。
 		/// </summary>
 		/// <param name="errorMessage"></param>
 		/// <param name="returnurl"></param>
-		public static void WriteFrontErrMsg(string errorMessage, string returnurl)
+		public static void WriteFrontErrMsg(string errorMessage, string returnurl = "mClose")
 		{
-			WriteErrMsg(errorMessage, returnurl, "/Home/ShowError");
+			WriteErrMsg(errorMessage, returnurl, "/Home/ShowMessage");
 		}
 		#endregion
 
@@ -539,29 +537,27 @@ namespace JX.Infrastructure
 		/// <param name="successMessage">消息内容</param>
 		/// <param name="returnurl">返回页面地址</param>
 		/// <param name="pageUrl">显示消息的页面地址</param>
-		public static void WriteSuccessMsg(string successMessage, string returnurl, string pageUrl = "/Admin/Home/ShowSuccess")
+		public static void WriteSuccessMsg(string successMessage, string returnurl= "mRefresh", string pageUrl = "/Admin/Home/ShowMessage")
 		{
-			SetSession("SuccessMessage", successMessage);
-			SetSession("ReturnUrl", returnurl);
-			MyHttpContext.Current.Response.Redirect(pageUrl);
+			WriteMessage(successMessage, returnurl,"成功消息",pageUrl);
 		}
 		/// <summary>
 		/// 会员中心显示成功消息。页面："~/User/ShowSuccess"。
 		/// </summary>
 		/// <param name="successMessage">消息内容</param>
 		/// <param name="returnurl">返回页面地址</param>
-		public static void WriteUserSuccessMsg(string successMessage, string returnurl)
+		public static void WriteUserSuccessMsg(string successMessage, string returnurl = "mRefresh")
 		{
-			WriteSuccessMsg(successMessage, returnurl, "/User/ShowSuccess");
+			WriteSuccessMsg(successMessage, returnurl, "/User/ShowMessage");
 		}
 		/// <summary>
 		/// 网站前台显示成功消息。页面："~/Home/ShowSuccess"。
 		/// </summary>
 		/// <param name="successMessage"></param>
 		/// <param name="returnurl"></param>
-		public static void WriteFrontSuccessMsg(string successMessage, string returnurl)
+		public static void WriteFrontSuccessMsg(string successMessage, string returnurl = "mRefresh")
 		{
-			WriteSuccessMsg(successMessage, returnurl, "/Home/ShowSuccess");
+			WriteSuccessMsg(successMessage, returnurl, "/Home/ShowMessage");
 		}
 		#endregion
 
@@ -5343,6 +5339,60 @@ namespace JX.Infrastructure
 			{
 				return "";
 			}
+		}
+		#endregion
+
+		#region 得到菜单路径
+		/// <summary>
+		/// 得到管理后台菜单路径。例：~/Config/AdminMenuShop.xml
+		/// </summary>
+		/// <returns></returns>
+		public static string GetAdminMenuPath()
+		{
+			WebHostConfig webHostConfig = ConfigHelper.Get<WebHostConfig>();
+			string adminMenuPath = "~/Config/AdminMenuShop.xml";
+			switch (webHostConfig.Edition)
+			{
+				case "Base":
+					adminMenuPath = "~/Config/AdminMenuBase.xml";
+					break;
+				case "BaseUser":
+					adminMenuPath = "~/Config/AdminMenuBaseUser.xml";
+					break;
+				case "Shop":
+					adminMenuPath = "~/Config/AdminMenuShop.xml";
+					break;
+				case "Industry":
+					adminMenuPath = "~/Config/AdminMenuIndustry.xml";
+					break;
+			}
+			return adminMenuPath;
+		}
+
+		/// <summary>
+		/// 得到会员中心菜单路径。例：~/Config/UserMenuShop.xml
+		/// </summary>
+		/// <returns></returns>
+		public static string GetUserMenuPath()
+		{
+			WebHostConfig webHostConfig = ConfigHelper.Get<WebHostConfig>();
+			string userMenuPath = "~/Config/UserMenuShop.xml";
+			switch (webHostConfig.Edition)
+			{
+				case "Base":
+					userMenuPath = "~/Config/UserMenuBase.xml";
+					break;
+				case "BaseUser":
+					userMenuPath = "~/Config/UserMenuBaseUser.xml";
+					break;
+				case "Shop":
+					userMenuPath = "~/Config/UserMenuShop.xml";
+					break;
+				case "Industry":
+					userMenuPath = "~/Config/UserMenuIndustry.xml";
+					break;
+			}
+			return userMenuPath;
 		}
 		#endregion
 	}

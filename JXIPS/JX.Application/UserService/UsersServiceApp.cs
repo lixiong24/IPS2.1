@@ -13,10 +13,10 @@ using System.Threading.Tasks;
 
 namespace JX.Application
 {
-	/// <summary>
-	/// 数据库表：Users 的应用层服务接口实现类.
-	/// </summary>
-	public partial class UsersServiceApp : IUsersServiceApp
+    /// <summary>
+    /// 会员模块相关的应用层服务接口实现类.
+    /// </summary>
+    public partial class UsersServiceApp : IUsersServiceApp
 	{
 		/// <summary>
 		/// 会员登录

@@ -283,8 +283,6 @@ namespace JX.Application
 				return "管理员名称不能为空";
 			if (string.IsNullOrEmpty(adminDTO.AdminPassword))
 				return "管理员密码不能为空";
-			if (string.IsNullOrEmpty(adminDTO.UserName))
-				return "前台会员名不能为空";
 			if (await _repository.IsExistAsync(adminDTO.AdminName))
 			{
 				return "已经存在同样的管理员名！";
@@ -331,8 +329,6 @@ namespace JX.Application
 				return "管理员名称不能为空";
 			if (string.IsNullOrEmpty(adminDTO.AdminPassword))
 				return "管理员密码不能为空";
-			if (string.IsNullOrEmpty(adminDTO.UserName))
-				return "前台会员名不能为空";
 			adminDTO.Hash = await _repository.GetAuthenticatePassHash(adminDTO.AdminPassword);
 			if (!Update(adminDTO))
 			{

@@ -84,6 +84,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 		}
 
 		[HttpPost]
+		[ValidateAntiForgeryToken]
 		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
 		public IActionResult DelAdmin(int id)
 		{
@@ -120,6 +121,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 			}
 		}
 		[HttpPost]
+		[ValidateAntiForgeryToken]
 		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
 		public IActionResult DelAdminMulti(string ids)
 		{
@@ -147,6 +149,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 			}
 		}
 		[HttpPost]
+		[ValidateAntiForgeryToken]
 		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
 		public IActionResult SetAdminStatus(int id)
 		{
@@ -216,14 +219,20 @@ namespace JXWebHost.Areas.Admin.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
 		public async Task<ActionResult> AdminEdit(int id, AdminViewModel adminViewModel, IFormCollection collection)
 		{
 			if (id <= 0)
 			{
 				#region 添加
-				if (!ModelState.IsValid)
+				if (string.IsNullOrEmpty(adminViewModel.AdminPassword))
 				{
-					ModelState.AddModelError(string.Empty, "验证未通过");
+					ModelState.AddModelError(string.Empty, "密码不能为空");
+					return View(adminViewModel);
+				}
+				else if(adminViewModel.AdminPassword.Length < 6)
+				{
+					ModelState.AddModelError(string.Empty, "密码最少6位");
 					return View(adminViewModel);
 				}
 				adminViewModel.RoleIDs = collection["RoleIDs"];
@@ -254,6 +263,11 @@ namespace JXWebHost.Areas.Admin.Controllers
 				adminDTO.RoleIDs = collection["RoleIDs"];
 				if (!string.IsNullOrEmpty(adminViewModel.AdminPassword))
 				{
+					if (adminViewModel.AdminPassword.Length < 6)
+					{
+						ModelState.AddModelError(string.Empty, "密码最少6位");
+						return View(adminViewModel);
+					}
 					adminDTO.AdminPassword = StringHelper.MD5(adminViewModel.AdminPassword.Trim());
 					adminDTO.ModifyPasswordTime = new DateTime?(DateTime.Now);
 				}
@@ -271,13 +285,13 @@ namespace JXWebHost.Areas.Admin.Controllers
 		#endregion
 
 		#region 角色管理
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public IActionResult RoleManage()
 		{
 			return View();
 		}
 
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public IActionResult GetRoleManage()
 		{
 			int PageNum = Utility.Query("PageNum", 0);
@@ -293,7 +307,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 			return Json(pagerModel);
 		}
 
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage,AdministratorManage")]
 		public IActionResult GetRoleList()
 		{
 			var roles = _RolesService.LoadListAll(p=>true);
@@ -302,7 +316,8 @@ namespace JXWebHost.Areas.Admin.Controllers
 		}
 
 		[HttpPost]
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[ValidateAntiForgeryToken]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public IActionResult DelRole(int id)
 		{
 			if (id <= 0)
@@ -340,40 +355,42 @@ namespace JXWebHost.Areas.Admin.Controllers
 		#endregion
 
 		#region 角色编辑
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public IActionResult RoleEdit(int id = -1)
 		{
-			if (id <= -1)
-				return View();
+            RolesDTO model = new RolesDTO();
+            model.RoleID = id;
+            if (id <= -1)
+				return View(model);
 			if(id==0)
 			{
-				Utility.WriteMessage("超级管理员不能编辑", "mClose");
-				return View();
+				Utility.WriteMessage("超级管理员角色不能编辑", "mClose");
+				return View(model);
 			}
-			var model = _RolesService.Get(p=>p.RoleID==id);
+			model = _RolesService.Get(p=>p.RoleID==id);
 			if (model == null || model.RoleID <= 0)
-				return View();
+				return View(model);
 			return View(model);
 		}
 
 		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<ActionResult> RoleEdit(int id=-1, RolesDTO model=null, IFormCollection collection=null)
+        [ValidateAntiForgeryToken]
+        [AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
+        public async Task<ActionResult> RoleEdit(int id=-1, RolesDTO model=null, IFormCollection collection=null)
 		{
-			if (!ModelState.IsValid)
-			{
-				ModelState.AddModelError(string.Empty, "验证未通过");
-				return View(model);
-			}
 			if (id == 0)
 			{
-				ModelState.AddModelError(string.Empty, "超级管理员不能编辑");
+				ModelState.AddModelError(string.Empty, "超级管理员角色不能编辑");
 				return View(model);
 			}
 			if (string.IsNullOrEmpty(model.RoleName))
 			{
 				ModelState.AddModelError(string.Empty, "角色名不能为空");
 				return View(model);
+			}
+			if (string.IsNullOrEmpty(model.Description))
+			{
+				model.Description = "";
 			}
 			if (id <= 0)
 			{
@@ -402,7 +419,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 		#endregion
 
 		#region 成员管理
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public async Task<IActionResult> RoleMember(int id = -1, string roleName = "")
 		{
 			if (id <= -1)
@@ -418,7 +435,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 		}
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public async Task<IActionResult> RoleMember(int id, IFormCollection collection)
 		{
 			if (id <= -1)
@@ -433,7 +450,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 		#endregion
 
 		#region 角色-菜单权限设置
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public async Task<ActionResult> RolePermissions(int id = -1,string roleName="")
 		{
 			PermissionsViewModels permissionsViewModels = new PermissionsViewModels();
@@ -449,8 +466,8 @@ namespace JXWebHost.Areas.Admin.Controllers
 			}
 			ViewBag.RoleID = id;
 			ViewBag.RoleName = roleName;
-			
-			string adminMenuPath = "~/Config/AdminMenuShop.xml";
+
+			string adminMenuPath = Utility.GetAdminMenuPath();
 			XmlHelper xmlHelper = XmlHelper.Instance(FileHelper.MapPath(adminMenuPath), XmlType.File);
 			XmlDocument xmlDoc = xmlHelper.XmlDoc;
 			XmlNode rootNode = xmlDoc.SelectSingleNode("menu");
@@ -501,7 +518,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public async Task<ActionResult> RolePermissions(int id,IFormCollection collection)
 		{
 			if (id <= -1)
@@ -529,7 +546,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 		#endregion
 
 		#region 角色-节点权限设置
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public async Task<ActionResult> NodePermissions(int id = -1, string PermissionsType = "Node")
 		{
 			NodePermissionsViewModel permissionsViewModels = new NodePermissionsViewModel();
@@ -567,7 +584,7 @@ namespace JXWebHost.Areas.Admin.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		[AdminAuthorize(Roles = "SuperAdmin,AdministratorManage")]
+		[AdminAuthorize(Roles = "SuperAdmin,AdminRoleManage")]
 		public async Task<ActionResult> NodePermissions(int id, IFormCollection collection)
 		{
 			if (id <= -1)
