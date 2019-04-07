@@ -23,6 +23,6 @@
     <ProjectReference Include="..\JX.Infrastructure\JX.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties bower_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>

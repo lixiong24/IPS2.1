@@ -16,9 +16,17 @@ namespace JX.Infrastructure.Common
 		/// <summary>
 		/// 初始化KEY文件的路径。应用程序根目录/Config/ShareKeys.xml
 		/// </summary>
-		public XmlRepository()
+		/// <param name="keyPath">KEY文件的路径。不指定则从“应用程序根目录/Config/ShareKeys.xml”取。</param>
+		public XmlRepository(string keyPath = "")
 		{
-			_KeyContentPath = Path.Combine(Directory.GetCurrentDirectory(), "Config", "ShareKeys.xml");
+			if (!string.IsNullOrEmpty(keyPath))
+			{
+				_KeyContentPath = keyPath;
+			}
+			else
+			{
+				_KeyContentPath = Path.Combine(Directory.GetCurrentDirectory(), "Config", "ShareKeys.xml");
+			}
 		}
 
 		/// <summary>
