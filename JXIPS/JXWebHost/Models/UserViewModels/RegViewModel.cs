@@ -6,23 +6,23 @@ using System.Threading.Tasks;
 
 namespace JXWebHost.Models.UserViewModels
 {
-    public class LoginViewModel
-    {
-        [Display(Name ="用户名")]
+	public class RegViewModel
+	{
+		[Display(Name = "用户名")]
 		[Required(ErrorMessage = "会员名不能为空")]
 		public string UserName { get; set; }
 
-        [Display(Name ="密码")]
+		[Display(Name = "密码")]
 		[Required(ErrorMessage = "密码不能为空")]
 		[DataType(DataType.Password)]
 		public string UserPassword { get; set; }
 
-        [Display(Name = "图形验证码")]
+		[Display(Name = "手机号")]
 		[DisplayFormat(ConvertEmptyStringToNull = false)]
-		public string ValidateCode { get; set; }
+		public string Mobile { get; set; } = string.Empty;
 
-		[Display(Name = "记住我")]
+		[Display(Name = "验证码")]
 		[DisplayFormat(ConvertEmptyStringToNull = false)]
-		public bool IsPersistent { get; set; } = false;
+		public string SmsCode { get; set; } = string.Empty;
 	}
 }

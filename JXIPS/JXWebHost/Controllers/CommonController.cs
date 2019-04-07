@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using JX.Infrastructure.Common;
 using JX.Infrastructure;
+using JX.Infrastructure.TencentCaptcha;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,6 +13,10 @@ namespace JXWebHost.Controllers
 {
     public class CommonController : Controller
     {
+		/// <summary>
+		/// 上传文件
+		/// </summary>
+		/// <returns></returns>
 		[HttpPost]
 		public async Task<IActionResult> UploadHandle()
 		{
@@ -19,6 +24,13 @@ namespace JXWebHost.Controllers
 			ResultInfo resultInfo = await Utility.FileUploadSaveAs(formFile);
 			return Json(resultInfo);
 		}
+
+		/// <summary>
+		/// 上传图片
+		/// </summary>
+		/// <param name="isThumb"></param>
+		/// <param name="isWaterMark"></param>
+		/// <returns></returns>
 		[HttpPost]
 		public async Task<IActionResult> UploadImageHandle(bool isThumb = false, bool isWaterMark = false)
 		{
@@ -27,6 +39,10 @@ namespace JXWebHost.Controllers
 			return Json(resultInfo);
 		}
 
+		/// <summary>
+		/// 图形验证码
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ValidateCode()
 		{
 			string code = "";
@@ -34,6 +50,49 @@ namespace JXWebHost.Controllers
 			Utility.SetSession("LoginValidateCode", code);
 			Response.Body.Dispose();
 			return File(ms.ToArray(), @"image/png");
+		}
+
+		/// <summary>
+		/// 发送短信
+		/// </summary>
+		/// <param name="mobile">手机号</param>
+		/// <param name="ticket">腾讯验证码客户端验证回调的票据</param>
+		/// <param name="randstr">腾讯验证码客户端验证回调的随机串</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult SendCodeSMS(string mobile,string ticket,string randstr)
+		{
+			ResultInfo resultInfo = new ResultInfo();
+			if(string.IsNullOrEmpty(mobile))
+			{
+				resultInfo.Status = 0;
+				resultInfo.Msg = "手机号不能为空";
+				return Json(resultInfo);
+			}
+			if (string.IsNullOrEmpty(ticket))
+			{
+				resultInfo.Status = 0;
+				resultInfo.Msg = "ticket不能为空";
+				return Json(resultInfo);
+			}
+			if (string.IsNullOrEmpty(randstr))
+			{
+				resultInfo.Status = 0;
+				resultInfo.Msg = "randstr不能为空";
+				return Json(resultInfo);
+			}
+			if (TencentCaptchaUtility.CheckTicket(ticket, randstr,Utility.GetClientIP()))
+			{
+				resultInfo.Status = 1;
+				resultInfo.Msg = "发送成功";
+				return Json(resultInfo);
+			}
+			else
+			{
+				resultInfo.Status = 0;
+				resultInfo.Msg = "ticket验证不通过，发送失败！";
+				return Json(resultInfo);
+			}
 		}
 
 		private IActionResult RedirectToLocal(string returnUrl)

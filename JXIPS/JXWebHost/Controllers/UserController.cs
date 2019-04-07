@@ -24,6 +24,14 @@ namespace JXWebHost.Controllers
 
 		[HttpGet]
 		[AllowAnonymous]
+		public IActionResult Register(string returnUrl = null)
+		{
+			ViewData["ReturnUrl"] = returnUrl;
+			return View();
+		}
+
+		[HttpGet]
+		[AllowAnonymous]
 		public IActionResult Login(string returnUrl = null)
 		{
 			ViewData["ReturnUrl"] = returnUrl;
@@ -96,7 +104,7 @@ namespace JXWebHost.Controllers
 			await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, userPrincipal, new AuthenticationProperties
 			{
 				//ExpiresUtc = DateTime.UtcNow.AddMinutes(30),
-				IsPersistent = false,
+				IsPersistent = model.IsPersistent,
 				AllowRefresh = false
 			});
 

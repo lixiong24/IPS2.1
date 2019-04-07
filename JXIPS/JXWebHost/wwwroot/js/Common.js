@@ -191,3 +191,64 @@ function layer_showFull(title, url) {
 	});
 	layer.full(index);
 }
+
+var valSendCodeSMSID = "TencentCaptcha";
+var valMobileID = "txtMobile";
+var valImgCodeID = "txtImgCode";
+var valCodeSMSTimer = parseInt(0);
+function valCodeSMSCountdown() {
+	if (valCodeSMSTimer == 0) {
+		jQuery("#" + valSendCodeSMSID).html("获取验证码");
+		jQuery("#" + valSendCodeSMSID).val("获取验证码");
+		jQuery("#" + valSendCodeSMSID).removeAttr("disabled");
+	} else {
+		valCodeSMSTimer--;
+		jQuery("#" + valSendCodeSMSID).html(valCodeSMSTimer + "秒后重发");
+		jQuery("#" + valSendCodeSMSID).val(valCodeSMSTimer + "秒后重发");
+		setTimeout("valCodeSMSCountdown()", 1000);
+	}
+}
+function valCodeSMSSendCodeSMS(res) {
+	// res（用户主动关闭验证码）= {ret: 2, ticket: null}
+	// res（验证成功） = {ret: 0, ticket: "String", randstr: "String"}
+	if (res.ret === 0) {
+		if (valCodeSMSTimer != 0) {
+			return false;
+		}
+		var mobile = jQuery("#" + valMobileID).val();
+		if (mobile == null || mobile == '') {
+			layer.alert('手机号码不能为空!');
+			return false;
+		}
+		var ticket = res.ticket;
+		var randstr = res.randstr;
+		var url = '/Common/SendCodeSMS';
+		$.ajax({
+			type: "POST",
+			url: url,
+			data: { "mobile": mobile, "ticket": ticket, "randstr": randstr },
+			headers: {
+				"X-CSRF-TOKEN-JXWebHost": $("input[name='AntiforgeryFieldname']").val()
+			},
+			error: function (data, status, e) {
+				layer.alert('网络超时，发送失败!');
+			},
+			success: function (returnData) {
+				if (returnData.status == "1") {
+					valCodeSMSTimer = parseInt(90);
+					$("#" + valSendCodeSMSID).html(valCodeSMSTimer + "秒后重发");
+					$("#" + valSendCodeSMSID).val(valCodeSMSTimer + "秒后重发");
+					$("#" + valSendCodeSMSID).attr({ "disabled": "disabled" });
+					valCodeSMSCountdown();
+				}
+				else {
+					layer.alert(returnData.msg);
+				}
+			}
+		});
+	}
+	else {
+		layer.alert("验证失败");
+		return false;
+	}
+}
